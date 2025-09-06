@@ -717,9 +717,17 @@
         }
 
         // Initialize the application
-        initializeTalents();
-        loadFromHub();
-        updateDisplay();
+        function initialize() {
+            // First load from hub to get the correct total points and any existing data
+            loadFromHub();
+            // Then ensure all talents are properly initialized
+            initializeTalents();
+            // Finally update the display
+            updateDisplay();
+        }
+
+        // Start the application
+        initialize();
     </script>
 </body>
 </html>
