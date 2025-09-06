@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talent Tree Builder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2333, #2d3748);
+            color: white;
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            overflow-x: auto;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #8B4513, #CD853F, #8B4513);
+            padding: 15px;
+            text-align: center;
+            border-bottom: 3px solid #D4AF37;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        }
+
+        .header h1 {
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            font-size: 2rem;
+        }
+
+        .points-counter {
+            background: rgba(0,0,0,0.7);
+            border: 2px solid #D4AF37;
+            border-radius: 10px;
+            padding: 10px 20px;
+            margin: 20px auto;
+            width: fit-content;
+            text-align: center;
+        }
+
+        .points-counter h2 {
+            color: #FFD700;
+            margin-bottom: 5px;
+        }
+
+        .points-input {
+            background: #2d3748;
+            border: 2px solid #D4AF37;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            width: 80px;
+            text-align: center;
+        }
+
+        .tree-container {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-width: 1200px;
+        }
+
+        .talent-tree {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+        }
+
+        .talent-row {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            position: relative;
+        }
+
+        .talent-card {
+            background: linear-gradient(135deg, #4a5568, #2d3748);
+            border: 3px solid #718096;
+            border-radius: 15px;
+            padding: 15px;
+            width: 180px;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            user-select: none;
+        }
+
+        .talent-card.unlocked {
+            border-color: #D4AF37;
+            background: linear-gradient(135deg, #8B4513, #CD853F);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+        }
+
+        .talent-card.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #4a5568;
+        }
+
+        .talent-card:hover:not(.locked) {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+        }
+
+        .talent-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #4a5568, #718096);
+            border: 2px solid #D4AF37;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .talent-name {
+            font-weight: bold;
+            text-align: center;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+
+        .talent-points {
+            background: rgba(0,0,0,0.8);
+            border: 2px solid #D4AF37;
+            border-radius: 20px;
+            padding: 5px 15px;
+            font-weight: bold;
+            color: #FFD700;
+            margin-top: auto;
+        }
+
+        .connection-line {
+            position: absolute;
+            background: #718096;
+            z-index: 1;
+        }
+
+        .connection-line.active {
+            background: #D4AF37;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+
+        .vertical-line {
+            width: 3px;
+            height: 40px;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .horizontal-line {
+            height: 3px;
+            width: 50px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .controls {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.8);
+            border: 2px solid #D4AF37;
+            border-radius: 10px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-button {
+            background: linear-gradient(135deg, #8B4513, #CD853F);
+            border: 2px solid #D4AF37;
+            color: white;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .control-button:hover {
+            background: linear-gradient(135deg, #CD853F, #8B4513);
+            transform: translateY(-2px);
+        }
+
+        .reset-button {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+        }
+
+        .reset-button:hover {
+            background: linear-gradient(135deg, #c53030, #e53e3e);
+        }
+
+        @media (max-width: 1400px) {
+            .tree-container {
+                overflow-x: auto;
+                padding-bottom: 40px;
+            }
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.9);
+            border: 2px solid #D4AF37;
+            border-radius: 8px;
+            padding: 10px;
+            color: white;
+            font-size: 0.9rem;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            max-width: 250px;
+        }
+
+        .talent-card:hover .tooltip {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⚔️ Battle Tactics Talent Tree ⚔️</h1>
+    </div>
+
+    <div class="points-counter">
+        <h2>Available Talent Points</h2>
+        <input type="number" id="totalPoints" class="points-input" value="50" min="0" max="999">
+        <div style="margin-top: 10px;">
+            <span>Remaining: </span>
+            <span id="remainingPoints" style="color: #FFD700; font-weight: bold; font-size: 1.2rem;">50</span>
+        </div>
+    </div>
+
+    <div class="tree-container">
+        <div class="talent-tree" id="talentTree">
+            <!-- Talent tree will be generated here -->
+        </div>
+    </div>
+
+    <div class="controls">
+        <h3 style="color: #FFD700; margin-bottom: 10px;">Controls</h3>
+        <div class="control-button" onclick="resetAllTalents()">🔄 Reset All</div>
+        <div class="control-button" onclick="exportBuild()">📋 Export Build</div>
+        <div class="control-button" onclick="importBuild()">📥 Import Build</div>
+        <div style="margin-top: 15px; font-size: 0.8rem; color: #a0aec0;">
+            <strong>Instructions:</strong><br>
+            • Left click: Add point<br>
+            • Right click: Remove point<br>
+            • Must have ≥1 point in prerequisite
+        </div>
+    </div>
+
+    <script>
+        // Talent tree data structure
+        const talentData = [
+            // Row 1
+            [
+                { id: 'guards_train_1', name: "Guardsmen's Training Speed I", maxPoints: 20, icon: '⚔️', prerequisites: [] }
+            ],
+            // Row 2
+            [
+                { id: 'spec_train_1', name: "Specialists' Training Speed I", maxPoints: 20, icon: '🛡️', prerequisites: ['guards_train_1'] },
+                { id: 'spec_march_1', name: "Specialists' March Speed I", maxPoints: 20, icon: '🏃', prerequisites: ['spec_train_1'] },
+                { id: 'spec_health_1', name: "Specialists' Health I", maxPoints: 20, icon: '❤️', prerequisites: ['spec_march_1'] }
+            ],
+            // Row 3
+            [
+                { id: 'monster_train_1', name: "Monsters' Training Speed I", maxPoints: 20, icon: '👹', prerequisites: ['spec_train_1'] },
+                { id: 'monster_march_1', name: "Monsters' March Speed I", maxPoints: 20, icon: '🦶', prerequisites: ['monster_train_1'] },
+                { id: 'monster_health_1', name: "Monsters' Health I", maxPoints: 20, icon: '💪', prerequisites: ['monster_march_1'] }
+            ],
+            // Row 4
+            [
+                { id: 'siege_train_1', name: "Siege Engines' Training Speed I", maxPoints: 20, icon: '🏗️', prerequisites: ['monster_train_1'] },
+                { id: 'siege_march_1', name: "Siege Engines' March Speed I", maxPoints: 20, icon: '⚙️', prerequisites: ['siege_train_1'] },
+                { id: 'eng_health_1', name: "Engineer Corps' Health I", maxPoints: 20, icon: '🔧', prerequisites: ['siege_march_1'] }
+            ],
+            // Row 5
+            [
+                { id: 'guards_march_1', name: "Guardsmen's March Speed I", maxPoints: 20, icon: '🚶', prerequisites: ['siege_train_1'] }
+            ],
+            // Row 6
+            [
+                { id: 'guards_health_1', name: "Guardsmen's Health I", maxPoints: 20, icon: '❤️', prerequisites: ['guards_march_1'] },
+                { id: 'army_carry_1', name: "Army Carrying Capacity I", maxPoints: 20, icon: '🎒', prerequisites: ['guards_health_1'] }
+            ],
+            // Row 7
+            [
+                { id: 'guards_str_1', name: "Guardsmen's Strength I", maxPoints: 20, icon: '💪', prerequisites: ['guards_health_1'] },
+                { id: 'guards_double_1', name: "Chance for Guardsmen Double Damage I", maxPoints: 1, icon: '⚡', prerequisites: ['guards_str_1'] }
+            ],
+            // Row 8
+            [
+                { id: 'spec_str_1', name: "Specialists' Strength I", maxPoints: 20, icon: '🗡️', prerequisites: ['guards_str_1'] },
+                { id: 'spec_double_1', name: "Chance for Specialists Double Damage I", maxPoints: 1, icon: '⚡', prerequisites: ['spec_str_1'] }
+            ],
+            // Row 9
+            [
+                { id: 'eng_str_1', name: "Engineer Corps' Strength I", maxPoints: 20, icon: '🔨', prerequisites: ['spec_str_1'] },
+                { id: 'eng_double_1', name: "Chance for Engineer Corps Double Damage I", maxPoints: 1, icon: '⚡', prerequisites: ['eng_str_1'] }
+            ],
+            // Row 10
+            [
+                { id: 'monster_str_1', name: "Monsters' Strength I", maxPoints: 20, icon: '👿', prerequisites: ['eng_str_1'] },
+                { id: 'monster_double_1', name: "Chance for Monsters Double Damage I", maxPoints: 1, icon: '⚡', prerequisites: ['monster_str_1'] }
+            ],
+            // TIER II TALENTS
+            // Row 11
+            [
+                { id: 'guards_train_2', name: "Guardsmen's Training Speed II", maxPoints: 20, icon: '⚔️', prerequisites: ['monster_str_1'] }
+            ],
+            // Row 12
+            [
+                { id: 'spec_train_2', name: "Specialists' Training Speed II", maxPoints: 20, icon: '🛡️', prerequisites: ['guards_train_2'] },
+                { id: 'spec_march_2', name: "Specialists' March Speed II", maxPoints: 20, icon: '🏃', prerequisites: ['spec_train_2'] },
+                { id: 'spec_health_2', name: "Specialists' Health II", maxPoints: 20, icon: '❤️', prerequisites: ['spec_march_2'] }
+            ],
+            // Row 13
+            [
+                { id: 'monster_train_2', name: "Monsters' Training Speed II", maxPoints: 20, icon: '👹', prerequisites: ['spec_train_2'] },
+                { id: 'monster_march_2', name: "Monsters' March Speed II", maxPoints: 20, icon: '🦶', prerequisites: ['monster_train_2'] },
+                { id: 'monster_health_2', name: "Monsters' Health II", maxPoints: 20, icon: '💪', prerequisites: ['monster_march_2'] }
+            ],
+            // Row 14
+            [
+                { id: 'siege_train_2', name: "Siege Engines' Training Speed II", maxPoints: 20, icon: '🏗️', prerequisites: ['monster_train_2'] },
+                { id: 'siege_march_2', name: "Siege Engines' March Speed II", maxPoints: 20, icon: '⚙️', prerequisites: ['siege_train_2'] },
+                { id: 'eng_health_2', name: "Engineer Corps' Health II", maxPoints: 20, icon: '🔧', prerequisites: ['siege_march_2'] }
+            ],
+            // Row 15
+            [
+                { id: 'guards_march_2', name: "Guardsmen's March Speed II", maxPoints: 20, icon: '🚶', prerequisites: ['siege_train_2'] }
+            ],
+            // Row 16
+            [
+                { id: 'guards_health_2', name: "Guardsmen's Health II", maxPoints: 20, icon: '❤️', prerequisites: ['guards_march_2'] },
+                { id: 'army_carry_2', name: "Army Carrying Capacity II", maxPoints: 20, icon: '🎒', prerequisites: ['guards_health_2'] }
+            ],
+            // Row 17
+            [
+                { id: 'guards_str_2', name: "Guardsmen's Strength II", maxPoints: 20, icon: '💪', prerequisites: ['guards_health_2'] },
+                { id: 'guards_double_2', name: "Chance for Guardsmen Double Damage II", maxPoints: 1, icon: '⚡', prerequisites: ['guards_str_2'] }
+            ],
+            // Row 18
+            [
+                { id: 'spec_str_2', name: "Specialists' Strength II", maxPoints: 20, icon: '🗡️', prerequisites: ['guards_str_2'] },
+                { id: 'spec_double_2', name: "Chance for Specialists Double Damage II", maxPoints: 1, icon: '⚡', prerequisites: ['spec_str_2'] }
+            ],
+            // Row 19
+            [
+                { id: 'monster_str_2', name: "Monsters' Strength II", maxPoints: 20, icon: '👿', prerequisites: ['spec_str_2'] },
+                { id: 'monster_double_2', name: "Chance for Monsters Double Damage II", maxPoints: 1, icon: '⚡', prerequisites: ['monster_str_2'] }
+            ],
+            // Row 20
+            [
+                { id: 'eng_str_2', name: "Engineer Corps' Strength II", maxPoints: 20, icon: '🔨', prerequisites: ['monster_str_2'] },
+                { id: 'eng_double_2', name: "Chance for Engineer Corps Double Damage II", maxPoints: 1, icon: '⚡', prerequisites: ['eng_str_2'] }
+            ],
+            // TIER III TALENTS
+            // Row 21
+            [
+                { id: 'guards_train_3', name: "Guardsmen's Training Speed III", maxPoints: 20, icon: '⚔️', prerequisites: ['eng_str_2'] }
+            ],
+            // Row 22
+            [
+                { id: 'spec_train_3', name: "Specialists' Training Speed III", maxPoints: 20, icon: '🛡️', prerequisites: ['guards_train_3'] },
+                { id: 'spec_march_3', name: "Specialists' March Speed III", maxPoints: 20, icon: '🏃', prerequisites: ['spec_train_3'] },
+                { id: 'spec_health_3', name: "Specialists' Health III", maxPoints: 20, icon: '❤️', prerequisites: ['spec_march_3'] }
+            ],
+            // Row 23
+            [
+                { id: 'monster_train_3', name: "Monsters' Training Speed III", maxPoints: 20, icon: '👹', prerequisites: ['spec_train_3'] },
+                { id: 'monster_march_3', name: "Monsters' March Speed III", maxPoints: 20, icon: '🦶', prerequisites: ['monster_train_3'] },
+                { id: 'monster_health_3', name: "Monsters' Health III", maxPoints: 20, icon: '💪', prerequisites: ['monster_march_3'] }
+            ],
+            // Row 24
+            [
+                { id: 'siege_train_3', name: "Siege Engines' Training Speed III", maxPoints: 20, icon: '🏗️', prerequisites: ['monster_train_3'] },
+                { id: 'siege_march_3', name: "Siege Engines' March Speed III", maxPoints: 20, icon: '⚙️', prerequisites: ['siege_train_3'] },
+                { id: 'eng_health_3', name: "Engineer Corps' Health III", maxPoints: 20, icon: '🔧', prerequisites: ['siege_march_3'] }
+            ],
+            // Row 25
+            [
+                { id: 'guards_march_3', name: "Guardsmen's March Speed III", maxPoints: 20, icon: '🚶', prerequisites: ['siege_train_3'] }
+            ],
+            // Row 26
+            [
+                { id: 'guards_health_3', name: "Guardsmen's Health III", maxPoints: 20, icon: '❤️', prerequisites: ['guards_march_3'] },
+                { id: 'army_carry_3', name: "Army Carrying Capacity III", maxPoints: 20, icon: '🎒', prerequisites: ['guards_health_3'] }
+            ],
+            // Row 27
+            [
+                { id: 'guards_str_3', name: "Guardsmen's Strength III", maxPoints: 20, icon: '💪', prerequisites: ['guards_health_3'] },
+                { id: 'guards_double_3', name: "Chance for Guardsmen Double Damage III", maxPoints: 1, icon: '⚡', prerequisites: ['guards_str_3'] }
+            ],
+            // Row 28
+            [
+                { id: 'spec_str_3', name: "Specialists' Strength III", maxPoints: 20, icon: '🗡️', prerequisites: ['guards_str_3'] },
+                { id: 'spec_double_3', name: "Chance for Specialists Double Damage III", maxPoints: 1, icon: '⚡', prerequisites: ['spec_str_3'] }
+            ],
+            // Row 29
+            [
+                { id: 'monster_str_3', name: "Monsters' Strength III", maxPoints: 20, icon: '👿', prerequisites: ['spec_str_3'] },
+                { id: 'monster_double_3', name: "Chance for Monsters Double Damage III", maxPoints: 1, icon: '⚡', prerequisites: ['monster_str_3'] }
+            ],
+            // Row 30
+            [
+                { id: 'eng_str_3', name: "Engineer Corps' Strength III", maxPoints: 20, icon: '🔨', prerequisites: ['monster_str_3'] },
+                { id: 'eng_double_3', name: "Chance for Engineer Corps Double Damage III", maxPoints: 1, icon: '⚡', prerequisites: ['eng_str_3'] }
+            ]
+        ];
+
+        // Game state
+        let talentPoints = {};
+        let totalAvailablePoints = 50;
+        let remainingPoints = 50;
+
+        // Initialize talents
+        function initializeTalents() {
+            talentData.flat().forEach(talent => {
+                talentPoints[talent.id] = 0;
+            });
+        }
+
+        // Check if talent is unlocked
+        function isTalentUnlocked(talent) {
+            if (talent.prerequisites.length === 0) return true;
+            return talent.prerequisites.some(prereq => talentPoints[prereq] > 0);
+        }
+
+        // Add talent point
+        function addTalentPoint(talentId) {
+            const talent = talentData.flat().find(t => t.id === talentId);
+            if (!talent || !isTalentUnlocked(talent)) return false;
+            
+            if (talentPoints[talentId] < talent.maxPoints && remainingPoints > 0) {
+                talentPoints[talentId]++;
+                remainingPoints--;
+                updateDisplay();
+                return true;
+            }
+            return false;
+        }
+
+        // Remove talent point
+        function removeTalentPoint(talentId) {
+            if (talentPoints[talentId] > 0) {
+                // Check if other talents depend on this one
+                const dependentTalents = talentData.flat().filter(t => 
+                    t.prerequisites.includes(talentId) && talentPoints[t.id] > 0
+                );
+                
+                if (dependentTalents.length > 0 && talentPoints[talentId] === 1) {
+                    alert("Cannot remove last point - other talents depend on this one!");
+                    return false;
+                }
+                
+                talentPoints[talentId]--;
+                remainingPoints++;
+                updateDisplay();
+                return true;
+            }
+            return false;
+        }
+
+        // Create talent card
+        function createTalentCard(talent) {
+            const card = document.createElement('div');
+            card.className = 'talent-card';
+            card.id = `card-${talent.id}`;
+            
+            const isUnlocked = isTalentUnlocked(talent);
+            if (isUnlocked) {
+                card.classList.add('unlocked');
+            } else {
+                card.classList.add('locked');
+            }
+
+            card.innerHTML = `
+                <div class="talent-icon">${talent.icon}</div>
+                <div class="talent-name">${talent.name}</div>
+                <div class="talent-points">${talentPoints[talent.id]}/${talent.maxPoints}</div>
+                <div class="tooltip">
+                    ${talent.name}<br>
+                    Points: ${talentPoints[talent.id]}/${talent.maxPoints}<br>
+                    ${talent.prerequisites.length > 0 ? 
+                        `Requires: ${talent.prerequisites.map(p => 
+                            talentData.flat().find(t => t.id === p)?.name || p
+                        ).join(', ')}` : 'No prerequisites'}
+                </div>
+            `;
+
+            // Event listeners
+            card.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (isUnlocked) {
+                    addTalentPoint(talent.id);
+                }
+            });
+
+            card.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                removeTalentPoint(talent.id);
+            });
+
+            return card;
+        }
+
+        // Render talent tree
+        function renderTalentTree() {
+            const container = document.getElementById('talentTree');
+            container.innerHTML = '';
+
+            talentData.forEach((row, rowIndex) => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'talent-row';
+
+                row.forEach((talent, colIndex) => {
+                    const card = createTalentCard(talent);
+                    rowDiv.appendChild(card);
+
+                    // Add connection lines for prerequisites
+                    if (rowIndex > 0) {
+                        const line = document.createElement('div');
+                        line.className = 'connection-line vertical-line';
+                        if (talentPoints[talent.id] > 0 || 
+                            talent.prerequisites.some(p => talentPoints[p] > 0)) {
+                            line.classList.add('active');
+                        }
+                        card.appendChild(line);
+                    }
+
+                    // Horizontal connections within row
+                    if (colIndex > 0) {
+                        const line = document.createElement('div');
+                        line.className = 'connection-line horizontal-line';
+                        line.style.left = '-50px';
+                        if (talentPoints[talent.id] > 0 || talentPoints[row[colIndex-1].id] > 0) {
+                            line.classList.add('active');
+                        }
+                        card.appendChild(line);
+                    }
+                });
+
+                container.appendChild(rowDiv);
+            });
+        }
+
+        // Update display
+        function updateDisplay() {
+            document.getElementById('remainingPoints').textContent = remainingPoints;
+            renderTalentTree();
+        }
+
+        // Reset all talents
+        function resetAllTalents() {
+            if (confirm('Are you sure you want to reset all talent points?')) {
+                initializeTalents();
+                remainingPoints = totalAvailablePoints;
+                updateDisplay();
+            }
+        }
+
+        // Export build
+        function exportBuild() {
+            const build = JSON.stringify({
+                totalPoints: totalAvailablePoints,
+                talents: talentPoints
+            });
+            navigator.clipboard.writeText(build).then(() => {
+                alert('Build copied to clipboard!');
+            });
+        }
+
+        // Import build
+        function importBuild() {
+            const input = prompt('Paste your build data here:');
+            if (input) {
+                try {
+                    const build = JSON.parse(input);
+                    totalAvailablePoints = build.totalPoints;
+                    talentPoints = build.talents;
+                    remainingPoints = totalAvailablePoints - Object.values(talentPoints).reduce((a, b) => a + b, 0);
+                    document.getElementById('totalPoints').value = totalAvailablePoints;
+                    updateDisplay();
+                    alert('Build imported successfully!');
+                } catch (e) {
+                    alert('Invalid build data!');
+                }
+            }
+        }
+
+        // Handle total points change
+        document.getElementById('totalPoints').addEventListener('change', function() {
+            const newTotal = parseInt(this.value) || 0;
+            const usedPoints = Object.values(talentPoints).reduce((a, b) => a + b, 0);
+            
+            if (newTotal < usedPoints) {
+                alert(`Cannot set total below ${usedPoints} (currently allocated points)`);
+                this.value = totalAvailablePoints;
+                return;
+            }
+            
+            totalAvailablePoints = newTotal;
+            remainingPoints = totalAvailablePoints - usedPoints;
+            updateDisplay();
+        });
+
+        // Initialize the application
+        initializeTalents();
+        renderTalentTree();
+    </script>
+</body>
+</html>

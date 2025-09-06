@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Total Battle Talent Tree Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2333, #2d3748);
+            color: white;
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            overflow-x: auto;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #8B4513, #CD853F, #8B4513);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid #D4AF37;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        }
+
+        .header h1 {
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .crown-icon {
+            background: rgba(0,0,0,0.7);
+            border: 2px solid #D4AF37;
+            border-radius: 50px;
+            padding: 15px 25px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            color: #FFD700;
+            font-weight: bold;
+        }
+
+        .points-counter {
+            background: rgba(0,0,0,0.7);
+            border: 2px solid #D4AF37;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px auto;
+            width: fit-content;
+            text-align: center;
+            min-width: 300px;
+        }
+
+        .points-counter h2 {
+            color: #FFD700;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .points-input {
+            background: #2d3748;
+            border: 2px solid #D4AF37;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            width: 100px;
+            text-align: center;
+            margin: 0 10px;
+        }
+
+        .points-display {
+            margin-top: 15px;
+            font-size: 1.1rem;
+        }
+
+        .points-remaining {
+            color: #FFD700;
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+
+        .trees-container {
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .tree-card {
+            background: linear-gradient(135deg, #4a5568, #2d3748);
+            border: 3px solid #718096;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tree-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+            border-color: #D4AF37;
+        }
+
+        .tree-card.has-points {
+            border-color: #D4AF37;
+            background: linear-gradient(135deg, #8B4513, #CD853F);
+        }
+
+        .tree-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #4a5568, #718096);
+            border: 3px solid #D4AF37;
+            border-radius: 15px;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+
+        .tree-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+            color: #FFD700;
+        }
+
+        .tree-description {
+            font-size: 0.9rem;
+            text-align: center;
+            line-height: 1.4;
+            margin-bottom: 15px;
+            color: #e2e8f0;
+        }
+
+        .tree-points {
+            background: rgba(0,0,0,0.8);
+            border: 2px solid #D4AF37;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-weight: bold;
+            color: #FFD700;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .controls {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.8);
+            border: 2px solid #D4AF37;
+            border-radius: 10px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        .control-button {
+            background: linear-gradient(135deg, #8B4513, #CD853F);
+            border: 2px solid #D4AF37;
+            color: white;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .control-button:hover {
+            background: linear-gradient(135deg, #CD853F, #8B4513);
+            transform: translateY(-2px);
+        }
+
+        .reset-button {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+        }
+
+        .reset-button:hover {
+            background: linear-gradient(135deg, #c53030, #e53e3e);
+        }
+
+        .footer {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            text-align: center;
+            margin-top: 40px;
+            border-top: 1px solid #4a5568;
+        }
+
+        .allocation-summary {
+            background: rgba(0,0,0,0.5);
+            border: 2px solid #D4AF37;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px auto;
+            max-width: 800px;
+        }
+
+        .allocation-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        .allocation-row:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            color: #FFD700;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid #D4AF37;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏰 Total Battle Talent Trees 🏰</h1>
+        <div class="crown-icon">
+            👑 <span id="crownPoints">0</span>
+        </div>
+    </div>
+
+    <div class="points-counter">
+        <h2>Total Available Talent Points</h2>
+        <div>
+            <label for="totalPoints">Set Points:</label>
+            <input type="number" id="totalPoints" class="points-input" value="100" min="0" max="9999">
+        </div>
+        <div class="points-display">
+            <div>Allocated: <span id="allocatedPoints">0</span></div>
+            <div>Remaining: <span class="points-remaining" id="remainingPoints">100</span></div>
+        </div>
+    </div>
+
+    <div class="allocation-summary">
+        <h3 style="color: #FFD700; text-align: center; margin-bottom: 15px;">Point Allocation Summary</h3>
+        <div class="allocation-row">
+            <span>Battle Tactics:</span>
+            <span id="battlePoints">0 points</span>
+        </div>
+        <div class="allocation-row">
+            <span>Expert Battle Tactics:</span>
+            <span id="expertPoints">0 points</span>
+        </div>
+        <div class="allocation-row">
+            <span>Economy:</span>
+            <span id="economyPoints">0 points</span>
+        </div>
+        <div class="allocation-row">
+            <span>Archaeology:</span>
+            <span id="archaeologyPoints">0 points</span>
+        </div>
+        <div class="allocation-row">
+            <span>Total Allocated:</span>
+            <span id="totalAllocated">0 points</span>
+        </div>
+    </div>
+
+    <div class="trees-container">
+        <div class="tree-card" onclick="openTree('battle')" id="battleCard">
+            <div class="tree-icon">⚔️</div>
+            <div class="tree-name">Battle Tactics</div>
+            <div class="tree-description">
+                Increases the strength of your guardsmen, specialists, and monsters.
+            </div>
+            <div class="tree-points" id="battleCardPoints">0 / 0 Points</div>
+        </div>
+
+        <div class="tree-card" onclick="openTree('expert')" id="expertCard">
+            <div class="tree-icon">🏆</div>
+            <div class="tree-name">Expert Battle Tactics</div>
+            <div class="tree-description">
+                Increases strength of your melee, ranged, mounted, and flying units.
+            </div>
+            <div class="tree-points" id="expertCardPoints">0 / 0 Points</div>
+        </div>
+
+        <div class="tree-card" onclick="openTree('economy')" id="economyCard">
+            <div class="tree-icon">💰</div>
+            <div class="tree-name">Economy</div>
+            <div class="tree-description">
+                Increases building productivity, construction speed, and resource gathering speed on the World Map.
+            </div>
+            <div class="tree-points" id="economyCardPoints">0 / 0 Points</div>
+        </div>
+
+        <div class="tree-card" onclick="openTree('archaeology')" id="archaeologyCard">
+            <div class="tree-icon">🏺</div>
+            <div class="tree-name">Archaeology</div>
+            <div class="tree-description">
+                Increase Crypt exploration efficiency and decrease Crypt exploration cost.
+            </div>
+            <div class="tree-points" id="archaeologyCardPoints">0 / 0 Points</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <h3 style="color: #FFD700; margin-bottom: 10px;">Controls</h3>
+        <div class="control-button" onclick="resetAllTrees()">🔄 Reset All Trees</div>
+        <div class="control-button" onclick="exportAllBuilds()">📋 Export All Builds</div>
+        <div class="control-button" onclick="importAllBuilds()">📥 Import All Builds</div>
+    </div>
+
+    <div class="footer">
+        <p>Click on any talent tree to start allocating your points. Points are shared across all trees.</p>
+    </div>
+
+    <script>
+        // Global talent point management
+        let globalTalentData = {
+            totalPoints: 100,
+            allocatedPoints: {
+                battle: 0,
+                expert: 0,
+                economy: 0,
+                archaeology: 0
+            },
+            treeBuilds: {
+                battle: {},
+                expert: {},
+                economy: {},
+                archaeology: {}
+            }
+        };
+
+        // Load saved data from localStorage
+        function loadSavedData() {
+            const saved = localStorage.getItem('totalBattleTalentHub');
+            if (saved) {
+                try {
+                    globalTalentData = JSON.parse(saved);
+                    updateDisplay();
+                } catch (e) {
+                    console.error('Error loading saved data:', e);
+                }
+            }
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('totalBattleTalentHub', JSON.stringify(globalTalentData));
+        }
+
+        // Update all displays
+        function updateDisplay() {
+            const total = globalTalentData.totalPoints;
+            const allocated = Object.values(globalTalentData.allocatedPoints).reduce((a, b) => a + b, 0);
+            const remaining = total - allocated;
+
+            document.getElementById('totalPoints').value = total;
+            document.getElementById('crownPoints').textContent = remaining;
+            document.getElementById('allocatedPoints').textContent = allocated;
+            document.getElementById('remainingPoints').textContent = remaining;
+            document.getElementById('totalAllocated').textContent = allocated + ' points';
+
+            // Update individual tree displays
+            Object.keys(globalTalentData.allocatedPoints).forEach(tree => {
+                const points = globalTalentData.allocatedPoints[tree];
+                document.getElementById(`${tree}Points`).textContent = points + ' points';
+                document.getElementById(`${tree}CardPoints`).textContent = `${points} / ${total} Points`;
+                
+                const card = document.getElementById(`${tree}Card`);
+                if (points > 0) {
+                    card.classList.add('has-points');
+                } else {
+                    card.classList.remove('has-points');
+                }
+            });
+        }
+
+        // Handle total points change
+        document.getElementById('totalPoints').addEventListener('change', function() {
+            const newTotal = parseInt(this.value) || 0;
+            const currentAllocated = Object.values(globalTalentData.allocatedPoints).reduce((a, b) => a + b, 0);
+            
+            if (newTotal < currentAllocated) {
+                alert(`Cannot set total below ${currentAllocated} (currently allocated points)`);
+                this.value = globalTalentData.totalPoints;
+                return;
+            }
+            
+            globalTalentData.totalPoints = newTotal;
+            updateDisplay();
+            saveData();
+        });
+
+        // Open specific talent tree
+        function openTree(treeType) {
+            // Save current state
+            saveData();
+            
+            // Store tree type for the tree page to access
+            localStorage.setItem('currentTree', treeType);
+            localStorage.setItem('returnToHub', 'true');
+            
+            // Navigate to appropriate tree
+            const treeFiles = {
+                battle: 'battle%20tactics.html',
+                expert: 'EXPERT.html',
+                economy: 'economy.html',
+                archaeology: 'archeology.html'
+            };
+            
+            if (treeFiles[treeType]) {
+                window.location.href = treeFiles[treeType];
+            }
+        }
+
+        // Reset all trees
+        function resetAllTrees() {
+            if (confirm('Are you sure you want to reset ALL talent trees? This will remove all allocated points.')) {
+                globalTalentData.allocatedPoints = {
+                    battle: 0,
+                    expert: 0,
+                    economy: 0,
+                    archaeology: 0
+                };
+                globalTalentData.treeBuilds = {
+                    battle: {},
+                    expert: {},
+                    economy: {},
+                    archaeology: {}
+                };
+                updateDisplay();
+                saveData();
+            }
+        }
+
+        // Export all builds
+        function exportAllBuilds() {
+            const exportData = {
+                version: '1.0',
+                totalPoints: globalTalentData.totalPoints,
+                builds: globalTalentData.treeBuilds,
+                allocated: globalTalentData.allocatedPoints
+            };
+            
+            const dataString = JSON.stringify(exportData);
+            navigator.clipboard.writeText(dataString).then(() => {
+                alert('All talent builds copied to clipboard!');
+            }).catch(() => {
+                // Fallback for browsers that don't support clipboard API
+                const textArea = document.createElement('textarea');
+                textArea.value = dataString;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('All talent builds copied to clipboard!');
+            });
+        }
+
+        // Import all builds
+        function importAllBuilds() {
+            const input = prompt('Paste your exported talent build data here:');
+            if (input) {
+                try {
+                    const importData = JSON.parse(input);
+                    
+                    if (importData.version && importData.builds && importData.allocated) {
+                        globalTalentData.totalPoints = importData.totalPoints || 100;
+                        globalTalentData.treeBuilds = importData.builds;
+                        globalTalentData.allocatedPoints = importData.allocated;
+                        
+                        updateDisplay();
+                        saveData();
+                        alert('All talent builds imported successfully!');
+                    } else {
+                        alert('Invalid import data format!');
+                    }
+                } catch (e) {
+                    alert('Invalid import data!');
+                }
+            }
+        }
+
+        // Check if returning from a tree page
+        function checkReturnFromTree() {
+            const returning = localStorage.getItem('returnToHub');
+            const treeData = localStorage.getItem('treeReturnData');
+            
+            if (returning === 'true' && treeData) {
+                try {
+                    const data = JSON.parse(treeData);
+                    globalTalentData.allocatedPoints[data.treeType] = data.pointsAllocated;
+                    globalTalentData.treeBuilds[data.treeType] = data.talentBuild;
+                    
+                    // Clean up
+                    localStorage.removeItem('returnToHub');
+                    localStorage.removeItem('treeReturnData');
+                    localStorage.removeItem('currentTree');
+                    
+                    updateDisplay();
+                    saveData();
+                } catch (e) {
+                    console.error('Error processing return data:', e);
+                }
+            }
+        }
+
+        // Initialize the page
+        function initialize() {
+            loadSavedData();
+            checkReturnFromTree();
+            updateDisplay();
+        }
+
+        // Start the application
+        initialize();
+    </script>
+</body>
+</html>
