@@ -33,6 +33,31 @@
             font-size: 2rem;
         }
 
+        .navigation {
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #4a5568;
+        }
+
+        .nav-button {
+            background: linear-gradient(135deg, #4a5568, #2d3748);
+            border: 2px solid #D4AF37;
+            color: white;
+            padding: 8px 16px;
+            margin: 0 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button:hover {
+            background: linear-gradient(135deg, #8B4513, #CD853F);
+            transform: translateY(-2px);
+        }
+
         .points-counter {
             background: rgba(0,0,0,0.7);
             border: 2px solid #D4AF37;
@@ -46,17 +71,6 @@
         .points-counter h2 {
             color: #FFD700;
             margin-bottom: 5px;
-        }
-
-        .points-input {
-            background: #2d3748;
-            border: 2px solid #D4AF37;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 1.1rem;
-            width: 80px;
-            text-align: center;
         }
 
         .tree-container {
@@ -258,12 +272,23 @@
         <h1>🏺 Archaeology Talent Tree 🏺</h1>
     </div>
 
+    <div class="navigation">
+        <div class="nav-button" onclick="returnToHub()">← Back to Hub</div>
+        <div class="nav-button" onclick="switchTree('battle-tactics.html')">Battle Tactics</div>
+        <div class="nav-button" onclick="switchTree('expert.html')">Expert Battle</div>
+        <div class="nav-button" onclick="switchTree('economy.html')">Economy</div>
+    </div>
+
     <div class="points-counter">
         <h2>Available Talent Points</h2>
-        <input type="number" id="totalPoints" class="points-input" value="100" min="0" max="999">
         <div style="margin-top: 10px;">
-            <span>Remaining: </span>
-            <span id="remainingPoints" style="color: #FFD700; font-weight: bold; font-size: 1.2rem;">100</span>
+            <div>Total Available: <span id="totalPoints" style="color: #FFD700; font-weight: bold;">100</span></div>
+            <div>This Tree: <span id="thisTreePoints" style="color: #FFD700; font-weight: bold;">0</span></div>
+            <div>Other Trees: <span id="otherTreesPoints" style="color: #a0aec0;">0</span></div>
+            <div style="margin-top: 10px;">
+                <span>Remaining: </span>
+                <span id="remainingPoints" style="color: #FFD700; font-weight: bold; font-size: 1.2rem;">100</span>
+            </div>
         </div>
     </div>
 
@@ -275,7 +300,7 @@
 
     <div class="controls">
         <h3 style="color: #FFD700; margin-bottom: 10px;">Controls</h3>
-        <div class="control-button" onclick="resetAllTalents()">🔄 Reset All</div>
+        <div class="control-button" onclick="resetAllTalents()">🔄 Reset This Tree</div>
         <div class="control-button" onclick="exportBuild()">📋 Export Build</div>
         <div class="control-button" onclick="importBuild()">📥 Import Build</div>
         <div style="margin-top: 15px; font-size: 0.8rem; color: #a0aec0;">
@@ -430,12 +455,81 @@
         // Game state
         let talentPoints = {};
         let totalAvailablePoints = 100;
-        let remainingPoints = 100;
+
+        // Hub integration
+        function loadFromHub() {
+            try {
+                const hubData = localStorage.getItem('totalBattleTalentHub');
+                if (hubData) {
+                    const data = JSON.parse(hubData);
+                    totalAvailablePoints = data.totalPoints || 100;
+                    
+                    // Initialize empty talent points first
+                    archaeologyTalentData.flat().forEach(talent => {
+                        talentPoints[talent.id] = 0;
+                    });
+                    
+                    // Load archaeology tree data if it exists
+                    if (data.treeBuilds && data.treeBuilds.archaeology) {
+                        Object.keys(data.treeBuilds.archaeology).forEach(talentId => {
+                            if (talentPoints.hasOwnProperty(talentId)) {
+                                talentPoints[talentId] = data.treeBuilds.archaeology[talentId];
+                            }
+                        });
+                    }
+                } else {
+                    // No hub data exists, use default
+                    totalAvailablePoints = 100;
+                    archaeologyTalentData.flat().forEach(talent => {
+                        talentPoints[talent.id] = 0;
+                    });
+                }
+            } catch (e) {
+                console.error('Error loading hub data:', e);
+                // Fallback initialization
+                totalAvailablePoints = 100;
+                archaeologyTalentData.flat().forEach(talent => {
+                    talentPoints[talent.id] = 0;
+                });
+            }
+        }
+
+        function saveToHub() {
+            try {
+                let hubData = localStorage.getItem('totalBattleTalentHub');
+                let data = hubData ? JSON.parse(hubData) : {
+                    totalPoints: 100,
+                    allocatedPoints: { battle: 0, expert: 0, economy: 0, archaeology: 0 },
+                    treeBuilds: { battle: {}, expert: {}, economy: {}, archaeology: {} }
+                };
+                
+                data.treeBuilds.archaeology = { ...talentPoints };
+                data.allocatedPoints.archaeology = Object.values(talentPoints).reduce((a, b) => a + b, 0);
+                
+                localStorage.setItem('totalBattleTalentHub', JSON.stringify(data));
+            } catch (e) {
+                console.error('Error saving to hub:', e);
+            }
+        }
+
+        function getRemainingPoints() {
+            try {
+                const hubData = localStorage.getItem('totalBattleTalentHub');
+                if (hubData) {
+                    const data = JSON.parse(hubData);
+                    const totalAllocated = Object.values(data.allocatedPoints || {}).reduce((a, b) => a + b, 0);
+                    return data.totalPoints - totalAllocated;
+                }
+            } catch (e) {
+                console.error('Error calculating remaining points:', e);
+            }
+            return totalAvailablePoints - Object.values(talentPoints).reduce((a, b) => a + b, 0);
+        }
 
         // Initialize talents
         function initializeTalents() {
             archaeologyTalentData.flat().forEach(talent => {
-                talentPoints[talent.id] = 0;
+                talentPoints[talent.id] = talentPoints[talent.id] || 0;
             });
         }
 
@@ -465,9 +559,11 @@
             const talent = archaeologyTalentData.flat().find(t => t.id === talentId);
             if (!talent || !isTalentUnlocked(talent)) return false;
             
-            if (talentPoints[talentId] < talent.maxPoints && remainingPoints > 0) {
+            const remaining = getRemainingPoints();
+            
+            if (talentPoints[talentId] < talent.maxPoints && remaining > 0) {
                 talentPoints[talentId]++;
-                remainingPoints--;
+                saveToHub();
                 updateDisplay();
                 return true;
             }
@@ -488,7 +584,7 @@
                 }
                 
                 talentPoints[talentId]--;
-                remainingPoints++;
+                saveToHub();
                 updateDisplay();
                 return true;
             }
@@ -591,15 +687,36 @@
 
         // Update display
         function updateDisplay() {
-            document.getElementById('remainingPoints').textContent = remainingPoints;
+            const thisTreePoints = Object.values(talentPoints).reduce((a, b) => a + b, 0);
+            const remaining = getRemainingPoints();
+            const otherTreesPoints = totalAvailablePoints - remaining - thisTreePoints;
+
+            document.getElementById('totalPoints').textContent = totalAvailablePoints;
+            document.getElementById('thisTreePoints').textContent = thisTreePoints;
+            document.getElementById('otherTreesPoints').textContent = otherTreesPoints;
+            document.getElementById('remainingPoints').textContent = remaining;
+            
             renderTalentTree();
+        }
+
+        // Navigation functions
+        function returnToHub() {
+            saveToHub();
+            window.location.href = 'index.html';
+        }
+
+        function switchTree(treeFile) {
+            saveToHub();
+            window.location.href = treeFile;
         }
 
         // Reset all talents
         function resetAllTalents() {
-            if (confirm('Are you sure you want to reset all talent points?')) {
-                initializeTalents();
-                remainingPoints = totalAvailablePoints;
+            if (confirm('Are you sure you want to reset the Archaeology talent tree?')) {
+                archaeologyTalentData.flat().forEach(talent => {
+                    talentPoints[talent.id] = 0;
+                });
+                saveToHub();
                 updateDisplay();
             }
         }
@@ -621,10 +738,8 @@
             if (input) {
                 try {
                     const build = JSON.parse(input);
-                    totalAvailablePoints = build.totalPoints;
                     talentPoints = build.talents;
-                    remainingPoints = totalAvailablePoints - Object.values(talentPoints).reduce((a, b) => a + b, 0);
-                    document.getElementById('totalPoints').value = totalAvailablePoints;
+                    saveToHub();
                     updateDisplay();
                     alert('Build imported successfully!');
                 } catch (e) {
@@ -633,25 +748,14 @@
             }
         }
 
-        // Handle total points change
-        document.getElementById('totalPoints').addEventListener('change', function() {
-            const newTotal = parseInt(this.value) || 0;
-            const usedPoints = Object.values(talentPoints).reduce((a, b) => a + b, 0);
-            
-            if (newTotal < usedPoints) {
-                alert(`Cannot set total below ${usedPoints} (currently allocated points)`);
-                this.value = totalAvailablePoints;
-                return;
-            }
-            
-            totalAvailablePoints = newTotal;
-            remainingPoints = totalAvailablePoints - usedPoints;
-            updateDisplay();
-        });
-
         // Initialize the application
-        initializeTalents();
-        renderTalentTree();
+        function initialize() {
+            loadFromHub();
+            initializeTalents();
+            updateDisplay();
+        }
+
+        initialize();
     </script>
 </body>
 </html>
