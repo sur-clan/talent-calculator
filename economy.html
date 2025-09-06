@@ -73,27 +73,15 @@
             margin-bottom: 5px;
         }
 
-        .points-display {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-top: 10px;
-        }
-
-        .points-stat {
+        .points-input {
+            background: #2d3748;
+            border: 2px solid #D4AF37;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            width: 80px;
             text-align: center;
-        }
-
-        .points-stat label {
-            display: block;
-            font-size: 0.9rem;
-            color: #a0aec0;
-        }
-
-        .points-stat span {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #FFD700;
         }
 
         .tree-container {
@@ -295,23 +283,14 @@
     </div>
 
     <div class="points-counter">
-        <h2>Economy Talent Points</h2>
-        <div class="points-display">
-            <div class="points-stat">
-                <label>Total Available</label>
-                <span id="totalPoints">100</span>
-            </div>
-            <div class="points-stat">
-                <label>Economy Tree</label>
-                <span id="economyPoints">0</span>
-            </div>
-            <div class="points-stat">
-                <label>Other Trees</label>
-                <span id="otherTreesPoints">0</span>
-            </div>
-            <div class="points-stat">
-                <label>Remaining</label>
-                <span id="remainingPoints" style="color: #FFD700; font-size: 1.4rem;">100</span>
+        <h2>Available Talent Points</h2>
+        <div style="margin-top: 10px;">
+            <div>Total Available: <span id="totalPoints" style="color: #FFD700; font-weight: bold;">100</span></div>
+            <div>This Tree: <span id="thisTreePoints" style="color: #FFD700; font-weight: bold;">0</span></div>
+            <div>Other Trees: <span id="otherTreesPoints" style="color: #a0aec0;">0</span></div>
+            <div style="margin-top: 10px;">
+                <span>Remaining: </span>
+                <span id="remainingPoints" style="color: #FFD700; font-weight: bold; font-size: 1.2rem;">100</span>
             </div>
         </div>
     </div>
@@ -324,7 +303,7 @@
 
     <div class="controls">
         <h3 style="color: #FFD700; margin-bottom: 10px;">Controls</h3>
-        <div class="control-button" onclick="resetThisTree()">🔄 Reset Economy Tree</div>
+        <div class="control-button" onclick="resetAllTalents()">🔄 Reset This Tree</div>
         <div class="control-button" onclick="exportBuild()">📋 Export Build</div>
         <div class="control-button" onclick="importBuild()">📥 Import Build</div>
         <div style="margin-top: 15px; font-size: 0.8rem; color: #a0aec0;">
@@ -336,7 +315,7 @@
     </div>
 
     <script>
-        // Economy talent tree data structure
+        // Economy talent tree data structure (keeping original data)
         const economyTalentData = [
             // TIER I
             // Row 1
@@ -473,72 +452,81 @@
             ]
         ];
 
-        // Global talent management
-        let globalTalentData = {
-            totalPoints: 100,
-            allocatedPoints: {
-                battle: 0,
-                expert: 0,
-                economy: 0,
-                archaeology: 0
-            },
-            treeBuilds: {
-                battle: {},
-                expert: {},
-                economy: {},
-                archaeology: {}
-            }
-        };
-
-        // Local talent points for this tree
+        // Game state - keeping original structure
         let talentPoints = {};
+        let totalAvailablePoints = 100;
+        let remainingPoints = 100;
+
+        // Hub integration
+        function loadFromHub() {
+            try {
+                const hubData = localStorage.getItem('totalBattleTalentHub');
+                if (hubData) {
+                    const data = JSON.parse(hubData);
+                    totalAvailablePoints = data.totalPoints || 100;
+                    
+                    // Load economy tree data if it exists
+                    if (data.treeBuilds && data.treeBuilds.economy) {
+                        talentPoints = { ...data.treeBuilds.economy };
+                    }
+                }
+            } catch (e) {
+                console.error('Error loading hub data:', e);
+            }
+        }
+
+        function saveToHub() {
+            try {
+                let hubData = localStorage.getItem('totalBattleTalentHub');
+                let data = hubData ? JSON.parse(hubData) : {
+                    totalPoints: 100,
+                    allocatedPoints: { battle: 0, expert: 0, economy: 0, archaeology: 0 },
+                    treeBuilds: { battle: {}, expert: {}, economy: {}, archaeology: {} }
+                };
+                
+                data.treeBuilds.economy = { ...talentPoints };
+                data.allocatedPoints.economy = Object.values(talentPoints).reduce((a, b) => a + b, 0);
+                
+                localStorage.setItem('totalBattleTalentHub', JSON.stringify(data));
+            } catch (e) {
+                console.error('Error saving to hub:', e);
+            }
+        }
+
+        function getRemainingPoints() {
+            try {
+                const hubData = localStorage.getItem('totalBattleTalentHub');
+                if (hubData) {
+                    const data = JSON.parse(hubData);
+                    const totalAllocated = Object.values(data.allocatedPoints || {}).reduce((a, b) => a + b, 0);
+                    return data.totalPoints - totalAllocated;
+                }
+            } catch (e) {
+                console.error('Error calculating remaining points:', e);
+            }
+            return totalAvailablePoints - Object.values(talentPoints).reduce((a, b) => a + b, 0);
+        }
 
         // Initialize talents
         function initializeTalents() {
             economyTalentData.flat().forEach(talent => {
-                talentPoints[talent.id] = 0;
+                if (!talentPoints[talent.id]) {
+                    talentPoints[talent.id] = 0;
+                }
             });
         }
 
-        // Load data from hub
-        function loadFromHub() {
-            const hubData = localStorage.getItem('totalBattleTalentHub');
-            if (hubData) {
-                try {
-                    globalTalentData = JSON.parse(hubData);
-                    // Load this tree's build
-                    if (globalTalentData.treeBuilds.economy) {
-                        talentPoints = { ...globalTalentData.treeBuilds.economy };
-                    }
-                } catch (e) {
-                    console.error('Error loading hub data:', e);
-                }
-            }
-        }
-
-        // Save data back to hub
-        function saveToHub() {
-            globalTalentData.treeBuilds.economy = { ...talentPoints };
-            globalTalentData.allocatedPoints.economy = Object.values(talentPoints).reduce((a, b) => a + b, 0);
-            localStorage.setItem('totalBattleTalentHub', JSON.stringify(globalTalentData));
-        }
-
-        // Check if talent is unlocked
+        // Check if talent is unlocked (simple single prerequisite logic for Economy)
         function isTalentUnlocked(talent) {
             if (!talent.prerequisites || talent.prerequisites.length === 0) {
                 return true;
             }
             
+            // Economy tree uses simple single prerequisites
             return talent.prerequisites.some(prereqId => {
                 const prereqPoints = talentPoints[prereqId] || 0;
                 return prereqPoints > 0;
             });
-        }
-
-        // Get remaining points across all trees
-        function getRemainingPoints() {
-            const totalAllocated = Object.values(globalTalentData.allocatedPoints).reduce((a, b) => a + b, 0);
-            return globalTalentData.totalPoints - totalAllocated;
         }
 
         // Add talent point
@@ -578,7 +566,7 @@
             return false;
         }
 
-        // Create talent card
+        // Create talent card (keeping original structure)
         function createTalentCard(talent) {
             const card = document.createElement('div');
             card.className = 'talent-card';
@@ -624,7 +612,7 @@
             return card;
         }
 
-        // Render talent tree
+        // Render talent tree (keeping original structure)
         function renderTalentTree() {
             const container = document.getElementById('talentTree');
             container.innerHTML = '';
@@ -665,13 +653,13 @@
 
         // Update display
         function updateDisplay() {
-            const economyPoints = Object.values(talentPoints).reduce((a, b) => a + b, 0);
-            const otherPoints = Object.values(globalTalentData.allocatedPoints).reduce((a, b) => a + b, 0) - economyPoints;
+            const thisTreePoints = Object.values(talentPoints).reduce((a, b) => a + b, 0);
             const remaining = getRemainingPoints();
+            const otherTreesPoints = totalAvailablePoints - remaining - thisTreePoints;
 
-            document.getElementById('totalPoints').textContent = globalTalentData.totalPoints;
-            document.getElementById('economyPoints').textContent = economyPoints;
-            document.getElementById('otherTreesPoints').textContent = otherPoints;
+            document.getElementById('totalPoints').textContent = totalAvailablePoints;
+            document.getElementById('thisTreePoints').textContent = thisTreePoints;
+            document.getElementById('otherTreesPoints').textContent = otherTreesPoints;
             document.getElementById('remainingPoints').textContent = remaining;
             
             renderTalentTree();
@@ -688,10 +676,14 @@
             window.location.href = treeFile;
         }
 
-        // Reset this tree only
-        function resetThisTree() {
+        // Reset all talents
+        function resetAllTalents() {
             if (confirm('Are you sure you want to reset the Economy talent tree?')) {
                 initializeTalents();
+                // Reset all points to 0
+                economyTalentData.flat().forEach(talent => {
+                    talentPoints[talent.id] = 0;
+                });
                 saveToHub();
                 updateDisplay();
             }
@@ -700,28 +692,24 @@
         // Export build
         function exportBuild() {
             const build = JSON.stringify({
-                treeType: 'economy',
+                totalPoints: totalAvailablePoints,
                 talents: talentPoints
             });
             navigator.clipboard.writeText(build).then(() => {
-                alert('Economy build copied to clipboard!');
+                alert('Build copied to clipboard!');
             });
         }
 
         // Import build
         function importBuild() {
-            const input = prompt('Paste your economy build data here:');
+            const input = prompt('Paste your build data here:');
             if (input) {
                 try {
                     const build = JSON.parse(input);
-                    if (build.treeType === 'economy' && build.talents) {
-                        talentPoints = build.talents;
-                        saveToHub();
-                        updateDisplay();
-                        alert('Economy build imported successfully!');
-                    } else {
-                        alert('Invalid economy build data!');
-                    }
+                    talentPoints = build.talents;
+                    saveToHub();
+                    updateDisplay();
+                    alert('Build imported successfully!');
                 } catch (e) {
                     alert('Invalid build data!');
                 }
@@ -729,14 +717,9 @@
         }
 
         // Initialize the application
-        function initialize() {
-            initializeTalents();
-            loadFromHub();
-            updateDisplay();
-        }
-
-        // Start the application
-        initialize();
+        initializeTalents();
+        loadFromHub();
+        updateDisplay();
     </script>
 </body>
 </html>
