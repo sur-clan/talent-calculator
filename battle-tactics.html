@@ -106,24 +106,25 @@
     .close-button:hover{background:linear-gradient(135deg,#444,#666)}
     .control-info{text-align:left;margin:20px 0;font-size:.9rem;color:#a0aec0}
 
-    /* Mobile tweaks */
+   /* Mobile tweaks */
     @media (max-width:768px){
       .header-title{font-size:22px}
       .talent-card{width:200px;height:300px;padding:15px}
       .talent-name{font-size:.9rem;height:45px;margin-bottom:12px}
       .controls-grid{width:130px;margin:0 auto 18px}
       .control-btn{height:36px;font-size:.9rem}
-      .talent-row{gap:20px;flex-wrap:wrap;justify-content:center}
-      .tree-container{padding:15px 10px}
+      .talent-row{gap:15px;flex-wrap:nowrap;justify-content:center;overflow-x:auto}
+      .tree-container{padding:15px 5px}
     }
     @media (max-width:480px){
       .header-title{font-size:20px}
-      .talent-card{width:180px;height:280px;padding:12px}
+      .talent-card{width:160px;height:270px;padding:10px;flex-shrink:0}
       .talent-name{font-size:.8rem;height:40px}
-      .controls-grid{width:120px}
-      .control-btn{height:32px;font-size:.8rem}
-      .talent-points{font-size:1rem;padding:4px 8px;bottom:6px}
-      .talent-row{gap:15px}
+      .controls-grid{width:110px}
+      .control-btn{height:30px;font-size:.75rem}
+      .talent-points{font-size:.9rem;padding:4px 6px;bottom:6px}
+      .talent-row{gap:10px;flex-wrap:nowrap;min-width:min-content}
+      .tree-container{padding:15px 5px;overflow-x:auto}
     }
   </style>
 </head>
@@ -409,3 +410,4 @@
   </script>
 </body>
 </html>
+
