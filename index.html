@@ -87,13 +87,53 @@
             font-size: 1.3rem;
         }
 
+        .allocation-summary {
+            background: rgba(0,0,0,0.5);
+            border: 2px solid #D4AF37;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px auto;
+            max-width: 800px;
+        }
+
+        .allocation-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        .allocation-row:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            color: #FFD700;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid #D4AF37;
+        }
+
+        /* Main talent tree grid */
         .trees-container {
             padding: 40px 20px;
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
+        }
+
+        .tree-grid {
+            display: table;
+            width: 100%;
+            border-spacing: 20px;
+        }
+
+        .tree-grid-row {
+            display: table-row;
+        }
+
+        .tree-grid-cell {
+            display: table-cell;
+            width: 50%;
+            vertical-align: top;
         }
 
         .tree-card {
@@ -105,6 +145,10 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
         }
 
         .tree-card:hover {
@@ -145,6 +189,7 @@
             line-height: 1.4;
             margin-bottom: 15px;
             color: #e2e8f0;
+            flex-grow: 1;
         }
 
         .tree-points {
@@ -156,6 +201,7 @@
             color: #FFD700;
             text-align: center;
             font-size: 1.1rem;
+            margin-top: auto;
         }
 
         .controls {
@@ -205,32 +251,6 @@
             margin-top: 40px;
             border-top: 1px solid #4a5568;
         }
-
-        .allocation-summary {
-            background: rgba(0,0,0,0.5);
-            border: 2px solid #D4AF37;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 20px auto;
-            max-width: 800px;
-        }
-
-        .allocation-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 5px 0;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
-        }
-
-        .allocation-row:last-child {
-            border-bottom: none;
-            font-weight: bold;
-            color: #FFD700;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 2px solid #D4AF37;
-        }
     </style>
 </head>
 <body>
@@ -278,40 +298,53 @@
     </div>
 
     <div class="trees-container">
-        <div class="tree-card" onclick="openTree('battle')" id="battleCard">
-            <div class="tree-icon">⚔️</div>
-            <div class="tree-name">Battle Tactics</div>
-            <div class="tree-description">
-                Increases the strength of your guardsmen, specialists, and monsters.
+        <div class="tree-grid">
+            <!-- Row 1: Battle Tactics and Expert Battle Tactics -->
+            <div class="tree-grid-row">
+                <div class="tree-grid-cell">
+                    <div class="tree-card" onclick="openTree('battle')" id="battleCard">
+                        <div class="tree-icon">⚔️</div>
+                        <div class="tree-name">Battle Tactics</div>
+                        <div class="tree-description">
+                            Increases the strength of your guardsmen, specialists, and monsters.
+                        </div>
+                        <div class="tree-points" id="battleCardPoints">0 / 0 Points</div>
+                    </div>
+                </div>
+                <div class="tree-grid-cell">
+                    <div class="tree-card" onclick="openTree('expert')" id="expertCard">
+                        <div class="tree-icon">🏆</div>
+                        <div class="tree-name">Expert Battle Tactics</div>
+                        <div class="tree-description">
+                            Increases strength of your melee, ranged, mounted, and flying units.
+                        </div>
+                        <div class="tree-points" id="expertCardPoints">0 / 0 Points</div>
+                    </div>
+                </div>
             </div>
-            <div class="tree-points" id="battleCardPoints">0 / 0 Points</div>
-        </div>
-
-        <div class="tree-card" onclick="openTree('expert')" id="expertCard">
-            <div class="tree-icon">🏆</div>
-            <div class="tree-name">Expert Battle Tactics</div>
-            <div class="tree-description">
-                Increases strength of your melee, ranged, mounted, and flying units.
+            <!-- Row 2: Economy and Archaeology -->
+            <div class="tree-grid-row">
+                <div class="tree-grid-cell">
+                    <div class="tree-card" onclick="openTree('economy')" id="economyCard">
+                        <div class="tree-icon">💰</div>
+                        <div class="tree-name">Economy</div>
+                        <div class="tree-description">
+                            Increases building productivity, construction speed, and resource gathering speed on the World Map.
+                        </div>
+                        <div class="tree-points" id="economyCardPoints">0 / 0 Points</div>
+                    </div>
+                </div>
+                <div class="tree-grid-cell">
+                    <div class="tree-card" onclick="openTree('archaeology')" id="archaeologyCard">
+                        <div class="tree-icon">🏺</div>
+                        <div class="tree-name">Archaeology</div>
+                        <div class="tree-description">
+                            Increase Crypt exploration efficiency and decrease Crypt exploration cost.
+                        </div>
+                        <div class="tree-points" id="archaeologyCardPoints">0 / 0 Points</div>
+                    </div>
+                </div>
             </div>
-            <div class="tree-points" id="expertCardPoints">0 / 0 Points</div>
-        </div>
-
-        <div class="tree-card" onclick="openTree('economy')" id="economyCard">
-            <div class="tree-icon">💰</div>
-            <div class="tree-name">Economy</div>
-            <div class="tree-description">
-                Increases building productivity, construction speed, and resource gathering speed on the World Map.
-            </div>
-            <div class="tree-points" id="economyCardPoints">0 / 0 Points</div>
-        </div>
-
-        <div class="tree-card" onclick="openTree('archaeology')" id="archaeologyCard">
-            <div class="tree-icon">🏺</div>
-            <div class="tree-name">Archaeology</div>
-            <div class="tree-description">
-                Increase Crypt exploration efficiency and decrease Crypt exploration cost.
-            </div>
-            <div class="tree-points" id="archaeologyCardPoints">0 / 0 Points</div>
         </div>
     </div>
 
@@ -530,5 +563,4 @@
         initialize();
     </script>
 </body>
-
 </html>
