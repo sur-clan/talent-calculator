@@ -13,7 +13,7 @@
       color:#fff;
       font-family:Arial, sans-serif;
       min-height:100vh;
-      overflow-x:auto;
+      overflow-x:hidden; /* prevent horizontal scroll */
       /* header (56) + points bar (44) */
       padding-top:100px;
       padding-bottom:80px;
@@ -49,7 +49,7 @@
 
     .tree-container{
       padding:20px;display:flex;justify-content:center;align-items:flex-start;
-      min-height:calc(100vh - 150px);width:100%;overflow-x:auto
+      min-height:calc(100vh - 150px);width:100%;overflow-x:hidden
     }
     .talent-tree{display:flex;flex-direction:column;align-items:center;gap:20px;position:relative;margin:0 auto}
     .talent-row{display:flex;align-items:center;justify-content:center;gap:30px;position:relative;min-height:340px}
@@ -106,25 +106,54 @@
     .close-button:hover{background:linear-gradient(135deg,#444,#666)}
     .control-info{text-align:left;margin:20px 0;font-size:.9rem;color:#a0aec0}
 
-   /* Mobile tweaks */
+    /* ====== Tablet (≤768px) — keep 3 across ====== */
     @media (max-width:768px){
       .header-title{font-size:22px}
-      .talent-card{width:200px;height:300px;padding:15px}
-      .talent-name{font-size:.9rem;height:45px;margin-bottom:12px}
-      .controls-grid{width:130px;margin:0 auto 18px}
-      .control-btn{height:36px;font-size:.9rem}
-      .talent-row{gap:15px;flex-wrap:nowrap;justify-content:center;overflow-x:auto}
-      .tree-container{padding:15px 5px}
+
+      .talent-row{
+        gap:14px;
+        flex-wrap:nowrap; /* force 3 across */
+        justify-content:center;
+        min-height:300px;
+      }
+
+      .talent-card{
+        width:150px;
+        height:260px;
+        padding:12px;
+      }
+
+      .talent-name{font-size:.85rem;height:40px;margin-bottom:10px}
+      .controls-grid{width:110px;margin:0 auto 14px}
+      .control-btn{height:30px;font-size:.85rem}
+      .talent-points{font-size:.95rem;padding:4px 8px}
+      .tree-container{padding:12px 8px}
     }
+
+    /* ====== Phones (≤480px) — 3 across, no wrap, no scroll ====== */
     @media (max-width:480px){
       .header-title{font-size:20px}
-      .talent-card{width:160px;height:270px;padding:10px;flex-shrink:0}
-      .talent-name{font-size:.8rem;height:40px}
-      .controls-grid{width:110px}
-      .control-btn{height:30px;font-size:.75rem}
-      .talent-points{font-size:.9rem;padding:4px 6px;bottom:6px}
-      .talent-row{gap:10px;flex-wrap:nowrap;min-width:min-content}
-      .tree-container{padding:15px 5px;overflow-x:auto}
+
+      .talent-row{
+        gap:8px;
+        flex-wrap:nowrap;          /* don't allow wrapping */
+        justify-content:center;
+        min-height:260px;
+      }
+
+      .talent-card{
+        width:112px;               /* 3*112 + 2*8 = 352px → fits 375px screens */
+        height:220px;
+        padding:10px;
+      }
+
+      .talent-icon{width:44px;height:44px;font-size:1.2rem}
+      .talent-name{font-size:.78rem;height:36px;margin-bottom:8px}
+      .controls-grid{width:96px}
+      .control-btn{height:26px;font-size:.8rem}
+      .talent-points{font-size:.9rem;padding:3px 6px;bottom:6px}
+
+      .tree-container{padding:10px 6px}
     }
   </style>
 </head>
@@ -289,9 +318,12 @@
 
     function removeOne(id){
       if(talentPoints[id] > 0){
-        const dependents = talentData.flat().filter(t => t.prerequisites.includes(id) && talentPoints[t.id]>0);
+        const dependents = talentData.flat().filter(t =>
+          t.prerequisites.includes(id) && talentPoints[t.id]>0
+        );
         if(dependents.length>0 && talentPoints[id]===1){
-          alert("Cannot remove last point - other talents depend on this one!"); return;
+          alert("Cannot remove last point - other talents depend on this one!");
+          return;
         }
         talentPoints[id]--; saveToHub(); updateDisplay();
       }
@@ -308,8 +340,13 @@
 
     function removeAll(id){
       if(talentPoints[id]>0){
-        const dependents = talentData.flat().filter(t => t.prerequisites.includes(id) && talentPoints[t.id]>0);
-        if(dependents.length>0){ alert("Cannot remove all points - other talents depend on this one!"); return; }
+        const dependents = talentData.flat().filter(t =>
+          t.prerequisites.includes(id) && talentPoints[t.id]>0
+        );
+        if(dependents.length>0){
+          alert("Cannot remove all points - other talents depend on this one!");
+          return;
+        }
         talentPoints[id]=0; saveToHub(); updateDisplay();
       }
     }
@@ -350,8 +387,10 @@
     function renderTalentTree(){
       const container=document.getElementById('talentTree');
       container.innerHTML='';
+
       talentData.forEach((row,rowIndex)=>{
         const rowDiv=document.createElement('div'); rowDiv.className='talent-row';
+
         row.forEach((t,colIndex)=>{
           const card=createTalentCard(t); rowDiv.appendChild(card);
 
@@ -360,12 +399,14 @@
             if(talentPoints[t.id]>0 || t.prerequisites.some(p=>talentPoints[p]>0)){ v.classList.add('active'); }
             card.appendChild(v);
           }
+
           if(colIndex>0){
             const h=document.createElement('div'); h.className='connection-line horizontal-line';
             if(talentPoints[t.id]>0 || talentPoints[row[colIndex-1].id]>0){ h.classList.add('active'); }
             card.appendChild(h);
           }
         });
+
         container.appendChild(rowDiv);
       });
     }
@@ -410,4 +451,3 @@
   </script>
 </body>
 </html>
-
