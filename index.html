@@ -60,6 +60,8 @@
       color:#C89B3C;margin-bottom:15px;font-size:1.5rem;
       font-family:'Cormorant Garamond',serif
     }
+
+    
     .points-input{
       background:#2d3748;border:2px solid #C89B3C;color:#fff;
       padding:10px 15px;border-radius:8px;font-size:1.2rem;
@@ -190,6 +192,11 @@
       .main-container{
         padding:15px 10px;
       }
+
+       .points-section label {
+    display: block;       /* move label above the input */
+    margin-bottom: 8px;   /* add spacing below label */
+  }
     }
 
     @media (max-width:480px){
@@ -243,7 +250,7 @@
     <div class="points-section">
       <h2>Total Available Talent Points</h2>
       <div>
-        <label for="totalPoints">Enter Total Available Talent Points Here: </label>
+        <label for="totalPoints">Enter Your Total Available Talent Points Here: </label>
         <input type="number" id="totalPoints" class="points-input" value="100" min="0" max="9999">
       </div>
 
@@ -574,6 +581,7 @@
 
 </body>
 </html>
+
 
 
 
