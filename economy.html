@@ -210,138 +210,140 @@
   <script>
   // Economy talent tree data structure
 const talentData = [
+ // Economy talent tree data structure with all talents (emoji-fixed)
+const economyTalentData = [
   // TIER I
   // Row 1
   [
-    { id: 'building_res_1', name: "Production of Building Resources in the City I", maxPoints: 20, icon: '🏗️', prerequisites: [] }
+    { id: 'building_res_1', name: "Production of Building RSS in the City I", maxPoints: 20, icon: '🏗️', prerequisites: [] }
   ],
   // Row 2
   [
-    { id: 'silver_prod_1', name: "Silver Production in the City I", maxPoints: 20, icon: '💰', prerequisites: ['building_res_1'] },
-    { id: 'caravan_speed_1', name: "Caravan Speed I", maxPoints: 20, icon: '🐪', prerequisites: ['silver_prod_1'] }
+    { id: 'silver_prod_1',   name: "Silver Production in the City I",            maxPoints: 20, icon: '🔘', prerequisites: ['building_res_1'] },
+    { id: 'caravan_speed_1', name: "Caravan Speed I",                             maxPoints: 20, icon: '🐪', prerequisites: ['silver_prod_1'] },
+    { id: 'caravan_carry_1', name: "Caravan Carrying Capacity I",                 maxPoints: 20, icon: '🎒', prerequisites: ['caravan_speed_1'] }
   ],
   // Row 3
   [
-    { id: 'warehouse_cap_1', name: "Warehouse Capacity I", maxPoints: 20, icon: '🏪', prerequisites: ['silver_prod_1'] },
-    { id: 'caravan_carry_1', name: "Caravan Carrying Capacity I", maxPoints: 20, icon: '📦', prerequisites: ['warehouse_cap_1'] }
+    { id: 'warehouse_cap_1', name: "Warehouse Capacity I",                        maxPoints: 20, icon: '📦', prerequisites: ['silver_prod_1'] }
   ],
   // Row 4
   [
-    { id: 'construction_speed_1', name: "Construction Speed I", maxPoints: 20, icon: '🔨', prerequisites: ['warehouse_cap_1'] },
-    { id: 'resource_gather_1', name: "Resource Gathering Speed I", maxPoints: 20, icon: '⛏️', prerequisites: ['construction_speed_1'] }
+    { id: 'resource_gather_1',   name: "Resource Gathering Speed I",              maxPoints: 20, icon: '⛏️', prerequisites: ['warehouse_cap_1'] },
+    { id: 'construction_speed_1',name: "Construction Speed I",                    maxPoints: 20, icon: '🛠️', prerequisites: ['resource_gather_1'] },
+    { id: 'research_speed_1',    name: "Research Speed I",                        maxPoints: 20, icon: '📚', prerequisites: ['construction_speed_1'] }
   ],
   // Row 5
   [
-    { id: 'research_speed_1', name: "Research Speed I", maxPoints: 20, icon: '📚', prerequisites: ['construction_speed_1'] },
-    { id: 'food_prod_1', name: "Food Production in the City I", maxPoints: 20, icon: '🌾', prerequisites: ['resource_gather_1'] }
+    { id: 'food_prod_1',     name: "Food Production in the City I",               maxPoints: 20, icon: '🌾', prerequisites: ['resource_gather_1'] }
   ],
+
+  // TIER II
   // Row 6
   [
-    { id: 'building_res_2', name: "Production of Building Resources in the City II", maxPoints: 20, icon: '🏗️', prerequisites: ['food_prod_1'] },
-    { id: 'tile_bonus_1', name: "Tile Bonus I", maxPoints: 20, icon: '🗺️', prerequisites: ['building_res_2'] }
+    { id: 'building_res_2',  name: "Production of Building RSS in the City II", maxPoints: 20, icon: '🏗️', prerequisites: ['food_prod_1'] },
+    { id: 'tile_bonus_1',    name: "Tile Bonus I",                                maxPoints: 20, icon: '🗺️', prerequisites: ['building_res_2'] }
   ],
-  
-  // TIER II
   // Row 7
   [
-    { id: 'caravan_speed_2', name: "Caravan Speed II", maxPoints: 20, icon: '🐪', prerequisites: ['building_res_2'] },
-    { id: 'silver_prod_2', name: "Silver Production in the City II", maxPoints: 20, icon: '💰', prerequisites: ['caravan_speed_2'] }
+    { id: 'silver_prod_2',   name: "Silver Production in the City II",            maxPoints: 20, icon: '🔘', prerequisites: ['building_res_2'] },
+    { id: 'caravan_speed_2', name: "Caravan Speed II",                            maxPoints: 20, icon: '🐪', prerequisites: ['silver_prod_2'] },
+    { id: 'caravan_carry_2', name: "Caravan Carrying Capacity II",                maxPoints: 20, icon: '🎒', prerequisites: ['caravan_speed_2'] }
   ],
   // Row 8
   [
-    { id: 'caravan_carry_2', name: "Caravan Carrying Capacity II", maxPoints: 20, icon: '📦', prerequisites: ['silver_prod_2'] },
-    { id: 'warehouse_cap_2', name: "Warehouse Capacity II", maxPoints: 20, icon: '🏪', prerequisites: ['caravan_carry_2'] }
+    { id: 'warehouse_cap_2', name: "Warehouse Capacity II",                       maxPoints: 20, icon: '📦', prerequisites: ['silver_prod_2'] }
   ],
   // Row 9
   [
-    { id: 'resource_gather_2', name: "Resource Gathering Speed II", maxPoints: 20, icon: '⛏️', prerequisites: ['warehouse_cap_2'] },
-    { id: 'construction_speed_2', name: "Construction Speed II", maxPoints: 20, icon: '🔨', prerequisites: ['resource_gather_2'] }
+    { id: 'resource_gather_2',   name: "Resource Gathering Speed II",             maxPoints: 20, icon: '⛏️', prerequisites: ['warehouse_cap_2'] },
+    { id: 'construction_speed_2',name: "Construction Speed II",                   maxPoints: 20, icon: '🛠️', prerequisites: ['resource_gather_2'] },
+    { id: 'research_speed_2',    name: "Research Speed II",                       maxPoints: 20, icon: '📚', prerequisites: ['construction_speed_2'] }
   ],
   // Row 10
   [
-    { id: 'food_prod_2', name: "Food Production in the City II", maxPoints: 20, icon: '🌾', prerequisites: ['resource_gather_2'] },
-    { id: 'research_speed_2', name: "Research Speed II", maxPoints: 20, icon: '📚', prerequisites: ['construction_speed_2'] }
+    { id: 'food_prod_2',     name: "Food Production in the City II",              maxPoints: 20, icon: '🌾', prerequisites: ['resource_gather_2'] }
   ],
+
+  // TIER III
   // Row 11
   [
-    { id: 'tile_bonus_2', name: "Tile Bonus II", maxPoints: 20, icon: '🗺️', prerequisites: ['food_prod_2'] },
-    { id: 'building_res_3', name: "Production of Building Resources in the City III", maxPoints: 20, icon: '🏗️', prerequisites: ['tile_bonus_2'] }
+    { id: 'building_res_3',  name: "Production of Building RSS in the City III", maxPoints: 20, icon: '🏗️', prerequisites: ['food_prod_2'] },
+    { id: 'tile_bonus_2',    name: "Tile Bonus II",                               maxPoints: 20, icon: '🗺️', prerequisites: ['building_res_3'] }
   ],
-  
-  // TIER III
   // Row 12
   [
-    { id: 'silver_prod_3', name: "Silver Production in the City III", maxPoints: 20, icon: '💰', prerequisites: ['building_res_3'] },
-    { id: 'caravan_speed_3', name: "Caravan Speed III", maxPoints: 20, icon: '🐪', prerequisites: ['silver_prod_3'] }
+    { id: 'silver_prod_3',   name: "Silver Production in the City III",           maxPoints: 20, icon: '🔘', prerequisites: ['building_res_3'] },
+    { id: 'caravan_speed_3', name: "Caravan Speed III",                           maxPoints: 20, icon: '🐪', prerequisites: ['silver_prod_3'] },
+    { id: 'caravan_carry_3', name: "Caravan Carrying Capacity III",               maxPoints: 20, icon: '🎒', prerequisites: ['caravan_speed_3'] }
   ],
   // Row 13
   [
-    { id: 'warehouse_cap_3', name: "Warehouse Capacity III", maxPoints: 20, icon: '🏪', prerequisites: ['silver_prod_3'] },
-    { id: 'caravan_carry_3', name: "Caravan Carrying Capacity III", maxPoints: 20, icon: '📦', prerequisites: ['warehouse_cap_3'] }
+    { id: 'warehouse_cap_3', name: "Warehouse Capacity III",                      maxPoints: 20, icon: '📦', prerequisites: ['silver_prod_3'] }
   ],
   // Row 14
   [
-    { id: 'construction_speed_3', name: "Construction Speed III", maxPoints: 20, icon: '🔨', prerequisites: ['warehouse_cap_3'] },
-    { id: 'resource_gather_3', name: "Resource Gathering Speed III", maxPoints: 20, icon: '⛏️', prerequisites: ['construction_speed_3'] }
+    { id: 'resource_gather_3',   name: "Resource Gathering Speed III",            maxPoints: 20, icon: '⛏️', prerequisites: ['warehouse_cap_3'] },
+    { id: 'construction_speed_3',name: "Construction Speed III",                  maxPoints: 20, icon: '🛠️', prerequisites: ['resource_gather_3'] },
+    { id: 'research_speed_3',    name: "Research Speed III",                      maxPoints: 20, icon: '📚', prerequisites: ['construction_speed_3'] }
   ],
   // Row 15
   [
-    { id: 'research_speed_3', name: "Research Speed III", maxPoints: 20, icon: '📚', prerequisites: ['construction_speed_3'] },
-    { id: 'food_prod_3', name: "Food Production in the City III", maxPoints: 20, icon: '🌾', prerequisites: ['resource_gather_3'] }
+    { id: 'food_prod_3',     name: "Food Production in the City III",             maxPoints: 20, icon: '🌾', prerequisites: ['resource_gather_3'] }
   ],
+
+  // TIER IV
   // Row 16
   [
-    { id: 'building_res_4', name: "Production of Building Resources in the City IV", maxPoints: 20, icon: '🏗️', prerequisites: ['food_prod_3'] },
-    { id: 'tile_bonus_3', name: "Tile Bonus III", maxPoints: 20, icon: '🗺️', prerequisites: ['building_res_4'] }
+    { id: 'building_res_4',  name: "Production of Building RSS in the City IV", maxPoints: 20, icon: '🏗️', prerequisites: ['food_prod_3'] },
+    { id: 'tile_bonus_3',    name: "Tile Bonus III",                              maxPoints: 20, icon: '🗺️', prerequisites: ['building_res_4'] }
   ],
-  
-  // TIER IV
   // Row 17
   [
-    { id: 'caravan_speed_4', name: "Caravan Speed IV", maxPoints: 20, icon: '🐪', prerequisites: ['building_res_4'] },
-    { id: 'silver_prod_4', name: "Silver Production in the City IV", maxPoints: 20, icon: '💰', prerequisites: ['caravan_speed_4'] }
+    { id: 'silver_prod_4',   name: "Silver Production in the City IV",            maxPoints: 20, icon: '🔘', prerequisites: ['building_res_4'] },
+    { id: 'caravan_speed_4', name: "Caravan Speed IV",                            maxPoints: 20, icon: '🐪', prerequisites: ['silver_prod_4'] },
+    { id: 'caravan_carry_4', name: "Caravan Carrying Capacity IV",                maxPoints: 20, icon: '🎒', prerequisites: ['caravan_speed_4'] }
   ],
   // Row 18
   [
-    { id: 'caravan_carry_4', name: "Caravan Carrying Capacity IV", maxPoints: 20, icon: '📦', prerequisites: ['silver_prod_4'] },
-    { id: 'warehouse_cap_4', name: "Warehouse Capacity IV", maxPoints: 20, icon: '🏪', prerequisites: ['caravan_carry_4'] }
+    { id: 'warehouse_cap_4', name: "Warehouse Capacity IV",                       maxPoints: 20, icon: '📦', prerequisites: ['silver_prod_4'] }
   ],
   // Row 19
   [
-    { id: 'resource_gather_4', name: "Resource Gathering Speed IV", maxPoints: 20, icon: '⛏️', prerequisites: ['warehouse_cap_4'] },
-    { id: 'construction_speed_4', name: "Construction Speed IV", maxPoints: 20, icon: '🔨', prerequisites: ['resource_gather_4'] }
+    { id: 'resource_gather_4',   name: "Resource Gathering Speed IV",             maxPoints: 20, icon: '⛏️', prerequisites: ['warehouse_cap_4'] },
+    { id: 'construction_speed_4',name: "Construction Speed IV",                   maxPoints: 20, icon: '🛠️', prerequisites: ['resource_gather_4'] },
+    { id: 'research_speed_4',    name: "Research Speed IV",                       maxPoints: 20, icon: '📚', prerequisites: ['construction_speed_4'] }
   ],
   // Row 20
   [
-    { id: 'food_prod_4', name: "Food Production in the City IV", maxPoints: 20, icon: '🌾', prerequisites: ['resource_gather_4'] },
-    { id: 'research_speed_4', name: "Research Speed IV", maxPoints: 20, icon: '📚', prerequisites: ['construction_speed_4'] }
+    { id: 'food_prod_4',     name: "Food Production in the City IV",              maxPoints: 20, icon: '🌾', prerequisites: ['resource_gather_4'] }
   ],
+
+  // TIER V
   // Row 21
   [
-    { id: 'tile_bonus_4', name: "Tile Bonus IV", maxPoints: 20, icon: '🗺️', prerequisites: ['food_prod_4'] },
-    { id: 'building_res_5', name: "Production of Building Resources in the City V", maxPoints: 20, icon: '🏗️', prerequisites: ['tile_bonus_4'] }
+    { id: 'building_res_5',  name: "Production of Building RSS in the City V", maxPoints: 20, icon: '🏗️', prerequisites: ['food_prod_4'] },
+    { id: 'tile_bonus_4',    name: "Tile Bonus IV",                               maxPoints: 20, icon: '🗺️', prerequisites: ['building_res_5'] }
   ],
-  
-  // TIER V
   // Row 22
   [
-    { id: 'silver_prod_5', name: "Silver Production in the City V", maxPoints: 20, icon: '💰', prerequisites: ['building_res_5'] },
-    { id: 'caravan_speed_5', name: "Caravan Speed V", maxPoints: 20, icon: '🐪', prerequisites: ['silver_prod_5'] }
+    { id: 'silver_prod_5',   name: "Silver Production in the City V",             maxPoints: 20, icon: '🔘', prerequisites: ['building_res_5'] },
+    { id: 'caravan_speed_5', name: "Caravan Speed V",                             maxPoints: 20, icon: '🐪', prerequisites: ['silver_prod_5'] },
+    { id: 'caravan_carry_5', name: "Caravan Carrying Capacity V",                 maxPoints: 20, icon: '🎒', prerequisites: ['caravan_speed_5'] }
   ],
   // Row 23
   [
-    { id: 'warehouse_cap_5', name: "Warehouse Capacity V", maxPoints: 20, icon: '🏪', prerequisites: ['silver_prod_5'] },
-    { id: 'caravan_carry_5', name: "Caravan Carrying Capacity V", maxPoints: 20, icon: '📦', prerequisites: ['warehouse_cap_5'] }
+    { id: 'warehouse_cap_5', name: "Warehouse Capacity V",                        maxPoints: 20, icon: '📦', prerequisites: ['silver_prod_5'] }
   ],
   // Row 24
   [
-    { id: 'construction_speed_5', name: "Construction Speed V", maxPoints: 20, icon: '🔨', prerequisites: ['warehouse_cap_5'] },
-    { id: 'resource_gather_5', name: "Resource Gathering Speed V", maxPoints: 20, icon: '⛏️', prerequisites: ['construction_speed_5'] }
+    { id: 'resource_gather_5',   name: "Resource Gathering Speed V",              maxPoints: 20, icon: '⛏️', prerequisites: ['warehouse_cap_5'] },
+    { id: 'construction_speed_5',name: "Construction Speed V",                    maxPoints: 20, icon: '🛠️', prerequisites: ['resource_gather_5'] },
+    { id: 'research_speed_5',    name: "Research Speed V",                        maxPoints: 20, icon: '📚', prerequisites: ['construction_speed_5'] }
   ],
   // Row 25
   [
-    { id: 'research_speed_5', name: "Research Speed V", maxPoints: 20, icon: '📚', prerequisites: ['construction_speed_5'] },
-    { id: 'food_prod_5', name: "Food Production in the City V", maxPoints: 20, icon: '🌾', prerequisites: ['resource_gather_5'] }
+    { id: 'food_prod_5',     name: "Food Production in the City V",               maxPoints: 20, icon: '🌾', prerequisites: ['resource_gather_5'] }
   ]
 ];
 
@@ -545,3 +547,4 @@ const talentData = [
   </script>
 </body>
 </html>
+
