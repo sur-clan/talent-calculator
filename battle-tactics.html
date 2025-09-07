@@ -81,13 +81,13 @@
       position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
       overflow:hidden;position:relative
     }
-    .talent-points::before{
+  
+.talent-points::before{
       content:'';position:absolute;top:0;left:0;height:100%;
-      background:linear-gradient(135deg,rgba(200,155,60,.3),rgba(200,155,60,.5));
+      background:linear-gradient(135deg,#31838f,#155879);
       transition:width .3s ease;z-index:-1;
       width:var(--progress,0%)
     }
-
     .connection-line{position:absolute;background:#718096;z-index:1;transition:all .3s ease}
     .connection-line.active{background:#C89B3C;box-shadow:0 0 10px rgba(200,155,60,.5)}
     .vertical-line{width:3px;height:40px;top:-40px;left:50%;transform:translateX(-50%)}
@@ -568,3 +568,4 @@
   </script>
 </body>
 </html>
+
