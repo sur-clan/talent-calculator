@@ -1,868 +1,521 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Archaeology Talent Tree</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Archaeology Talent Tree</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
 
-        body {
-            background: linear-gradient(135deg, #1a2333, #2d3748);
-            color: white;
-            font-family: 'Arial', sans-serif;
-            min-height: 100vh;
-            overflow-x: auto;
-        }
+    /* ===== FIXED “scales” background with subtle dark overlay ===== */
+    body{
+      color:#fff;
+      font-family:Arial, sans-serif;
+      min-height:100vh;
+      overflow-x:hidden;
+      padding-top:100px; /* header (56) + points bar (44) */
+      padding-bottom:80px;
+      position:relative;
+      background:transparent;
+    }
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      z-index:-2;
+      background:url('scales.jpg') center/cover no-repeat fixed;
+      transform:translateZ(0);
+    }
+    body::after{
+      content:"";
+      position:fixed;
+      inset:0;
+      z-index:-1;
+      background:linear-gradient(135deg, rgba(10,14,20,.75), rgba(20,26,36,.75));
+      pointer-events:none;
+    }
 
-        .header {
-            background: linear-gradient(90deg, #8B4513, #CD853F, #8B4513);
-            padding: 15px;
-            text-align: center;
-            border-bottom: 3px solid #D4AF37;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-        }
+    /* ===== HEADER ===== */
+    .header{
+      position:fixed;top:0;left:0;right:0;height:56px;
+      display:grid;grid-template-columns:56px 1fr 56px;align-items:center;
+      background:#0b0b0b;border-bottom:2px solid #C89B3C;z-index:1000
+    }
+    .back-button,.info-button{
+      background:none;border:0;color:#fff;font-size:20px;width:56px;height:56px;cursor:pointer
+    }
+    .back-button:hover,.info-button:hover{background:rgba(255,255,255,.06);border-radius:4px}
+    .header-title{
+      grid-column:2;text-align:center;margin:0;
+      font-family:'Cormorant Garamond',serif;font-weight:400;font-size:28px;letter-spacing:.3px;color:#fff;
+      text-shadow:0 1px 0 rgba(0,0,0,.4)
+    }
 
-        .header h1 {
-            color: #FFD700;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-            font-size: 2rem;
-        }
+    /* ===== POINTS BAR ===== */
+    .points-bar{
+      position:fixed;top:56px;left:0;right:0;height:44px;
+      background:#0f3c55;border-bottom:2px solid #C89B3C;
+      display:flex;align-items:center;justify-content:center;gap:10px;z-index:900
+    }
+    .points-emblem{font-size:18px;filter:drop-shadow(0 1px 0 rgba(0,0,0,.4));opacity:.9}
+    .points-bar #pointsText{color:#ffffff;font-weight:700;font-size:16px}
 
-        .navigation {
-            background: rgba(0,0,0,0.5);
-            padding: 10px;
-            text-align: center;
-            border-bottom: 1px solid #4a5568;
-        }
+    /* ===== TREE LAYOUT ===== */
+    .tree-container{
+      padding:20px;display:flex;justify-content:center;align-items:flex-start;
+      min-height:calc(100vh - 150px);width:100%;
+    }
+    .talent-tree{display:flex;flex-direction:column;align-items:center;gap:20px;position:relative;margin:0 auto}
+    .talent-row{display:flex;align-items:center;justify-content:center;gap:30px;position:relative;min-height:340px}
 
-        .nav-button {
-            background: linear-gradient(135deg, #4a5568, #2d3748);
-            border: 2px solid #D4AF37;
-            color: white;
-            padding: 8px 16px;
-            margin: 0 5px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            display: inline-block;
-            transition: all 0.3s ease;
-        }
+    .talent-card{
+      background:linear-gradient(135deg,#4a5568,#2d3748);
+      border:3px solid #718096;border-radius:15px;padding:20px;width:220px;height:310px;position:relative;user-select:none;z-index:10;
+      display:flex;flex-direction:column;align-items:center;
+    }
+    .talent-card.unlocked{border-color:#C89B3C;background:linear-gradient(135deg,#8B4513,#CD853F);box-shadow:0 0 15px rgba(200,155,60,.5)}
+    .talent-card.locked{opacity:.55;border-color:#4a5568}
+    .talent-card:hover:not(.locked){transform:translateY(-5px);box-shadow:0 8px 25px rgba(200,155,60,.3)}
 
-        .nav-button:hover {
-            background: linear-gradient(135deg, #8B4513, #CD853F);
-            transform: translateY(-2px);
-        }
+    .talent-icon{width:60px;height:60px;background:linear-gradient(45deg,#4a5568,#718096);border:2px solid #C89B3C;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 15px}
+    .talent-name{font-weight:bold;text-align:center;font-size:1rem;line-height:1.3;height:50px;display:flex;align-items:center;justify-content:center;margin-bottom:15px;padding:0 5px}
 
-        .points-counter {
-            background: rgba(0,0,0,0.7);
-            border: 2px solid #D4AF37;
-            border-radius: 10px;
-            padding: 10px 20px;
-            margin: 20px auto;
-            width: fit-content;
-            text-align: center;
-        }
+    .controls-grid{width:140px;margin:0 auto 20px;display:flex;flex-direction:column;align-items:center}
+    .controls-row{display:flex;gap:8px;margin-bottom:8px;width:100%;justify-content:space-between}
+    .control-btn{flex:1;height:40px;border:2px solid #C89B3C;border-radius:6px;color:#fff;font-size:1rem;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s ease}
+    .control-btn:hover:not(:disabled){transform:translateY(-1px)}
+    .control-btn:disabled{opacity:.3;cursor:not-allowed;background:#444!important;border-color:#666!important;transform:none}
+    .remove-btn{background:linear-gradient(135deg,#f1c40f,#f39c12)}
+    .remove-btn:hover:not(:disabled){background:linear-gradient(135deg,#f39c12,#f1c40f)}
+    .add-btn{background:linear-gradient(135deg,#31838f,#155879)}
+    .add-btn:hover:not(:disabled){background:linear-gradient(135deg,#155879,#31838f)}
 
-        .points-counter h2 {
-            color: #FFD700;
-            margin-bottom: 5px;
-        }
+    /* Points pill with progress fill */
+    .talent-points{
+      background:rgba(0,0,0,.9);border:2px solid #C89B3C;border-radius:12px;
+      padding:6px 12px;font-weight:bold;color:#C89B3C;font-size:1.1rem;text-align:center;
+      position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+      overflow:hidden
+    }
+    .talent-points::before{
+      content:'';position:absolute;top:0;left:0;height:100%;
+      background:linear-gradient(135deg,#31838f,#155879);width:var(--progress,0%);transition:width .3s ease;z-index:-1
+    }
 
-        .tree-container {
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: calc(100vh - 200px);
-            width: 100%;
-            overflow-x: auto;
-        }
+    /* Connectors */
+    .connection-line{position:absolute;background:#718096;z-index:1;transition:all .3s ease}
+    .connection-line.active{background:#C89B3C;box-shadow:0 0 10px rgba(200,155,60,.5)}
+    .vertical-line{width:3px;height:40px;top:-40px;left:50%;transform:translateX(-50%)}
+    .horizontal-line{height:3px;width:30px;top:50%;transform:translateY(-50%);left:-30px}
 
-        .talent-tree {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            position: relative;
-            margin: 0 auto;
-        }
+    /* Footer */
+    .footer{
+      position:fixed;bottom:0;left:0;right:0;background:#000;height:70px;
+      display:flex;align-items:center;justify-content:center;z-index:1000;border-top:2px solid #C89B3C
+    }
+    .reset-button{
+      background:linear-gradient(135deg,#842800,#7f2a01);border:2px solid #C89B3C;color:#fff;
+      padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:bold;font-size:1.1rem;transition:all .3s ease;
+      font-family:'Cormorant Garamond',serif
+    }
+    .reset-button:hover{background:linear-gradient(135deg,#c53030,#e53e3e);transform:translateY(-2px)}
 
-        .talent-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 30px;
-            position: relative;
-            min-height: 340px;
-        }
+    /* ====== Tablet (≤768px) — keep 3 across ====== */
+    @media (max-width:768px){
+      .header-title{font-size:22px}
+      .talent-row{gap:12px;flex-wrap:nowrap;justify-content:center;min-height:300px}
+      .talent-card{width:160px;height:260px;padding:12px}
+      .talent-name{font-size:.85rem;height:40px;margin-bottom:10px}
+      .controls-grid{width:120px;margin:0 auto 14px}
+      .control-btn{height:30px;font-size:.85rem}
+      .talent-points{font-size:.95rem;padding:4px 8px}
+      .tree-container{padding:12px 6px}
+      .horizontal-line{width:12px;left:-12px}
+    }
 
-        .talent-card {
-            background: linear-gradient(135deg, #4a5568, #2d3748);
-            border: 3px solid #718096;
-            border-radius: 15px;
-            padding: 20px;
-            width: 220px;
-            height: 310px;
-            position: relative;
-            user-select: none;
-            z-index: 10;
-        }
-
-        .talent-card.unlocked {
-            border-color: #D4AF37;
-            background: linear-gradient(135deg, #8B4513, #CD853F);
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
-        }
-
-        .talent-card.locked {
-            opacity: 0.5;
-            border-color: #4a5568;
-        }
-
-        .talent-card:hover:not(.locked) {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
-        }
-
-        .talent-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(45deg, #4a5568, #718096);
-            border: 2px solid #D4AF37;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin: 0 auto 15px auto;
-        }
-
-        .talent-name {
-            font-weight: bold;
-            text-align: center;
-            font-size: 1rem;
-            line-height: 1.3;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
-            padding: 0 5px;
-        }
-
-        .controls-grid {
-            width: 140px;
-            margin: 0 auto 20px auto;
-        }
-
-        .controls-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-
-        .control-btn {
-            flex: 1;
-            height: 40px;
-            border: 2px solid #D4AF37;
-            border-radius: 6px;
-            color: white;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-        }
-
-        .control-btn:hover:not(:disabled) {
-            transform: translateY(-1px);
-        }
-
-        .control-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            background: #444 !important;
-            border-color: #666 !important;
-            transform: none;
-        }
-
-        .remove-btn {
-            background: linear-gradient(135deg, #f1c40f, #f39c12);
-        }
-
-        .remove-btn:hover:not(:disabled) {
-            background: linear-gradient(135deg, #f39c12, #f1c40f);
-        }
-
-        .add-btn {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-        }
-
-        .add-btn:hover:not(:disabled) {
-            background: linear-gradient(135deg, #2980b9, #3498db);
-        }
-
-        .points-display {
-            background: rgba(0,0,0,0.9);
-            border: 2px solid #D4AF37;
-            border-radius: 12px;
-            padding: 6px 12px;
-            font-weight: bold;
-            color: #FFD700;
-            font-size: 1.1rem;
-            text-align: center;
-            position: absolute;
-            bottom: 8px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .connection-line {
-            position: absolute;
-            background: #718096;
-            z-index: 1;
-            transition: all 0.3s ease;
-        }
-
-        .connection-line.active {
-            background: #D4AF37;
-            box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
-        }
-
-        .vertical-line {
-            width: 3px;
-            height: 40px;
-            top: -40px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .horizontal-line {
-            height: 3px;
-            width: 50px;
-            top: 50%;
-            transform: translateY(-50%);
-            left: -50px;
-        }
-
-        .controls {
-            position: fixed;
-            top: 50%;
-            right: 20px;
-            transform: translateY(-50%);
-            background: rgba(0,0,0,0.8);
-            border: 2px solid #D4AF37;
-            border-radius: 10px;
-            padding: 20px;
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-        }
-
-        .control-button {
-            background: linear-gradient(135deg, #8B4513, #CD853F);
-            border: 2px solid #D4AF37;
-            color: white;
-            padding: 10px 15px;
-            margin: 5px 0;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            width: 100%;
-            transition: all 0.3s ease;
-        }
-
-        .control-button:hover {
-            background: linear-gradient(135deg, #CD853F, #8B4513);
-            transform: translateY(-2px);
-        }
-
-        .reset-button {
-            background: linear-gradient(135deg, #e53e3e, #c53030);
-        }
-
-        .reset-button:hover {
-            background: linear-gradient(135deg, #c53030, #e53e3e);
-        }
-
-        /* Mobile responsive styles */
-        @media (max-width: 768px) {
-            .talent-card {
-                width: 200px;
-                height: 300px;
-                padding: 15px;
-            }
-
-            .talent-name {
-                font-size: 0.9rem;
-                height: 45px;
-                margin-bottom: 12px;
-            }
-
-            .controls-grid {
-                width: 130px;
-                margin: 0 auto 18px auto;
-            }
-
-            .control-btn {
-                height: 36px;
-                font-size: 0.9rem;
-            }
-
-            .controls {
-                position: fixed;
-                top: auto;
-                bottom: 20px;
-                right: 10px;
-                left: 10px;
-                transform: none;
-                padding: 15px;
-                background: rgba(0,0,0,0.95);
-                max-width: 300px;
-                margin: 0 auto;
-            }
-
-            .talent-row {
-                gap: 20px;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .tree-container {
-                padding: 15px 10px;
-            }
-
-            .header h1 {
-                font-size: 1.5rem;
-            }
-
-            .nav-button {
-                padding: 6px 12px;
-                margin: 0 3px;
-                font-size: 0.9rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .talent-card {
-                width: 180px;
-                height: 280px;
-                padding: 12px;
-            }
-
-            .talent-name {
-                font-size: 0.8rem;
-                height: 40px;
-            }
-
-            .controls-grid {
-                width: 120px;
-            }
-
-            .control-btn {
-                height: 32px;
-                font-size: 0.8rem;
-            }
-
-            .points-display {
-                font-size: 1rem;
-                padding: 4px 8px;
-                bottom: 6px;
-            }
-
-            .talent-row {
-                gap: 15px;
-            }
-        }
-    </style>
+    /* ====== Phones (≤480px) — 3 across, no wrap ====== */
+    @media (max-width:480px){
+      .header-title{font-size:20px}
+      .talent-row{gap:6px;flex-wrap:nowrap;justify-content:center;min-height:260px}
+      .talent-card{width:122px;height:220px;padding:10px}
+      .talent-icon{width:44px;height:44px;font-size:1.2rem}
+      .talent-name{font-size:.65rem;height:36px;margin-bottom:8px}
+      .controls-grid{width:102px;margin:0 auto 12px}
+      .control-btn{height:26px;font-size:.8rem}
+      .talent-points{font-size:.9rem;padding:3px 6px;bottom:6px}
+      .tree-container{padding:10px 3px}
+      .horizontal-line{width:6px;left:-6px}
+    }
+  </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🏺 Archaeology Talent Tree 🏺</h1>
-    </div>
+  <!-- Header -->
+  <div class="header">
+    <button class="back-button" onclick="returnToHub()">←</button>
+    <h1 class="header-title">Archaeology</h1>
+    <button class="info-button" onclick="openModal()">ⓘ</button>
+  </div>
 
-    <div class="navigation">
-        <button class="nav-button" onclick="returnToHub()">← Back to Hub</button>
-        <button class="nav-button" onclick="switchTree('battle-tactics.html')">Battle Tactics</button>
-        <button class="nav-button" onclick="switchTree('expert.html')">Expert Battle</button>
-        <button class="nav-button" onclick="switchTree('economy.html')">Economy</button>
-    </div>
+  <!-- Points bar -->
+  <div class="points-bar">
+    <span class="points-emblem">🏺</span>
+    <span id="pointsText">0</span>
+  </div>
 
-    <div class="points-counter">
-        <h2>Available Talent Points</h2>
-        <div style="margin-top: 10px;">
-            <div>Total Available: <span id="totalPoints" style="color: #FFD700; font-weight: bold;">100</span></div>
-            <div>This Tree: <span id="thisTreePoints" style="color: #FFD700; font-weight: bold;">0</span></div>
-            <div>Other Trees: <span id="otherTreesPoints" style="color: #a0aec0;">0</span></div>
-            <div style="margin-top: 10px;">
-                <span>Remaining: </span>
-                <span id="remainingPoints" style="color: #FFD700; font-weight: bold; font-size: 1.2rem;">100</span>
-            </div>
+  <!-- Tree -->
+  <div class="tree-container">
+    <div class="talent-tree" id="talentTree"></div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <button class="reset-button" onclick="resetAllTalents()">Reset Archaeology Talents</button>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="infoModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);z-index:2000;justify-content:center;align-items:center">
+    <div class="modal-content" style="background:linear-gradient(135deg,#2d3748,#1a2333);border:2px solid #C89B3C;border-radius:15px;padding:30px;max-width:400px;width:90%;text-align:center">
+      <h3 class="modal-title" style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:1.5rem;color:#C89B3C;margin-bottom:20px">Controls</h3>
+      <button class="modal-button" style="background:linear-gradient(135deg,#8B4513,#CD853F);border:2px solid #C89B3C;color:#fff;padding:10px 20px;margin:10px 5px;border-radius:8px;cursor:pointer;font-weight:bold;width:100%;transition:all .3s ease" onclick="exportBuild()">📋 Export Build</button>
+      <button class="modal-button" style="background:linear-gradient(135deg,#8B4513,#CD853F);border:2px solid #C89B3C;color:#fff;padding:10px 20px;margin:10px 5px;border-radius:8px;cursor:pointer;font-weight:bold;width:100%;transition:all .3s ease" onclick="importBuild()">📥 Import Build</button>
+      <div class="control-info" style="text-align:left;margin:20px 0;font-size:.9rem;color:#a0aec0">
+        <strong>Button Controls:</strong><br>
+        • <strong>+</strong>: Add 1 point<br>
+        • <strong>-</strong>: Remove 1 point<br>
+        • <strong>&gt;&gt;</strong>: Add to maximum<br>
+        • <strong>&lt;&lt;</strong>: Remove all points<br>
+        • Must have ≥1 point in prerequisite<br>
+        • “+” between prereqs means ALL are required
+      </div>
+      <button class="modal-button close-button" style="background:linear-gradient(135deg,#666,#444);border:2px solid #C89B3C;color:#fff;padding:10px 20px;margin:10px 5px;border-radius:8px;cursor:pointer;font-weight:bold;width:100%;transition:all .3s ease" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    /* ===== Archaeology Talent Data (kept from your page) ===== */
+    const archaeologyTalentData = [
+      // Row 1
+      [
+        { id: 'tar_prod_1', name: "Tar Production Speed I", maxPoints: 20, icon: '🛢️', prerequisites: [] },
+        { id: 'bonus_exp_1', name: "Bonus Experience in Crypts I", maxPoints: 20, icon: '📈', prerequisites: ['tar_prod_1'] }
+      ],
+      // Row 2
+      [
+        { id: 'crypt_march_1', name: "Crypt March Range I", maxPoints: 20, icon: '🗺️', prerequisites: ['tar_prod_1'] },
+        { id: 'tar_cap_1', name: "Tar Capacity I", maxPoints: 20, icon: '📦', prerequisites: ['crypt_march_1'] }
+      ],
+      // Row 3
+      [
+        { id: 'equip_craft_1', name: "Equipment Crafting Speed I", maxPoints: 20, icon: '🔨', prerequisites: ['crypt_march_1'] },
+        { id: 'crypt_twice_1', name: "Chance to Explore a Crypt Twice I", maxPoints: 1, icon: '🎲', prerequisites: ['equip_craft_1'] },
+        { id: 'crypt_cost_1', name: "Crypt Exploration Cost I", maxPoints: 1, icon: '💰', prerequisites: ['crypt_twice_1'] }
+      ],
+      // Row 4
+      [
+        { id: 'crypt_eff_1', name: "Crypt Exploration Efficiency I", maxPoints: 20, icon: '⚡', prerequisites: ['equip_craft_1'] }
+      ],
+      // Row 5
+      [
+        { id: 'tar_prod_2', name: "Tar Production Speed II", maxPoints: 20, icon: '🛢️', prerequisites: ['crypt_eff_1'] },
+        { id: 'bonus_exp_2', name: "Bonus Experience in Crypts II", maxPoints: 20, icon: '📈', prerequisites: ['tar_prod_2'] }
+      ],
+      // Row 6
+      [
+        { id: 'crypt_march_2', name: "Crypt March Range II", maxPoints: 20, icon: '🗺️', prerequisites: ['tar_prod_2'] },
+        { id: 'tar_cap_2', name: "Tar Capacity II", maxPoints: 20, icon: '📦', prerequisites: ['crypt_march_2'] }
+      ],
+      // Row 7
+      [
+        { id: 'equip_craft_2', name: "Equipment Crafting Speed II", maxPoints: 20, icon: '🔨', prerequisites: ['crypt_march_2'] },
+        { id: 'crypt_twice_2', name: "Chance to Explore a Crypt Twice II", maxPoints: 1, icon: '🎲', prerequisites: ['equip_craft_2'] },
+        { id: 'crypt_cost_2', name: "Crypt Exploration Cost II", maxPoints: 1, icon: '💰', prerequisites: ['crypt_twice_2'] }
+      ],
+      // Row 8
+      [
+        { id: 'crypt_eff_2', name: "Crypt Exploration Efficiency II", maxPoints: 20, icon: '⚡', prerequisites: ['equip_craft_2'] }
+      ],
+      // Row 9
+      [
+        { id: 'tar_prod_3', name: "Tar Production Speed III", maxPoints: 20, icon: '🛢️', prerequisites: ['crypt_eff_2'] },
+        { id: 'bonus_exp_3', name: "Bonus Experience in Crypts III", maxPoints: 20, icon: '📈', prerequisites: ['tar_prod_3'] }
+      ],
+      // Row 10
+      [
+        { id: 'crypt_march_3', name: "Crypt March Range III", maxPoints: 20, icon: '🗺️', prerequisites: ['tar_prod_3'] },
+        { id: 'tar_cap_3', name: "Tar Capacity III", maxPoints: 20, icon: '📦', prerequisites: ['crypt_march_3'] }
+      ],
+      // Row 11
+      [
+        { id: 'common_eff_1', name: "Common Crypt Exploration Efficiency I", maxPoints: 20, icon: '🏺', prerequisites: ['crypt_march_3'] },
+        { id: 'common_cost_1', name: "Common Crypt Exploration Cost I", maxPoints: 1, icon: '💎', prerequisites: ['common_eff_1'] }
+      ],
+      // Row 12
+      [
+        { id: 'rare_eff_1', name: "Rare Crypt Exploration Efficiency I", maxPoints: 20, icon: '💀', prerequisites: ['common_eff_1'] },
+        { id: 'rare_cost_1', name: "Rare Crypt Exploration Cost I", maxPoints: 1, icon: '💎', prerequisites: ['rare_eff_1'] }
+      ],
+      // Row 13
+      [
+        { id: 'epic_eff_1', name: "Epic Crypt Exploration Efficiency I", maxPoints: 20, icon: '👑', prerequisites: ['rare_eff_1'] },
+        { id: 'epic_cost_1', name: "Epic Crypt Exploration Cost I", maxPoints: 1, icon: '💎', prerequisites: ['epic_eff_1'] }
+      ],
+      // Row 14
+      [
+        { id: 'crypt_eff_3', name: "Crypt Exploration Efficiency III", maxPoints: 20, icon: '⚡', prerequisites: ['epic_eff_1'] },
+        { id: 'crypt_twice_3', name: "Chance to Explore a Crypt Twice III", maxPoints: 1, icon: '🎲', prerequisites: ['crypt_eff_3'] },
+        { id: 'crypt_cost_3', name: "Crypt Exploration Cost III", maxPoints: 1, icon: '💰', prerequisites: ['crypt_twice_3'] }
+      ],
+      // Row 15
+      [
+        { id: 'equip_craft_3', name: "Equipment Crafting Speed III", maxPoints: 20, icon: '🔨', prerequisites: ['crypt_eff_3'] }
+      ],
+      // Row 16
+      [
+        { id: 'tar_prod_4', name: "Tar Production IV", maxPoints: 20, icon: '🛢️', prerequisites: ['equip_craft_3'] },
+        { id: 'bonus_exp_4', name: "Bonus Experience in Crypts IV", maxPoints: 20, icon: '📈', prerequisites: ['tar_prod_4'] }
+      ],
+      // Row 17 (AND requirement next row)
+      [
+        { id: 'crypt_march_4', name: "Crypt March Range IV", maxPoints: 20, icon: '🗺️', prerequisites: ['tar_prod_4'] },
+        { id: 'tar_cap_4', name: "Tar Capacity IV", maxPoints: 20, icon: '📦', prerequisites: ['tar_prod_4'] }
+      ],
+      // Row 18
+      [
+        { id: 'common_eff_2', name: "Common Crypt Exploration Efficiency II", maxPoints: 20, icon: '🏺', prerequisites: ['crypt_march_4','tar_cap_4'] },
+        { id: 'common_cost_2', name: "Common Crypt Exploration Cost II", maxPoints: 1, icon: '💎', prerequisites: ['common_eff_2'] }
+      ],
+      // Row 19
+      [
+        { id: 'rare_eff_2', name: "Rare Crypt Exploration Efficiency II", maxPoints: 20, icon: '💀', prerequisites: ['common_eff_2'] },
+        { id: 'rare_cost_2', name: "Rare Crypt Exploration Cost II", maxPoints: 1, icon: '💎', prerequisites: ['rare_eff_2'] }
+      ],
+      // Row 20
+      [
+        { id: 'epic_eff_3', name: "Epic Crypt Exploration Efficiency III", maxPoints: 20, icon: '👑', prerequisites: ['rare_eff_2'] },
+        { id: 'epic_cost_2', name: "Epic Crypt Exploration Cost II", maxPoints: 1, icon: '💎', prerequisites: ['epic_eff_3'] }
+      ],
+      // Row 21
+      [
+        { id: 'equip_craft_4', name: "Equipment Crafting Speed IV", maxPoints: 20, icon: '🔨', prerequisites: ['epic_eff_3'] },
+        { id: 'crypt_twice_4', name: "Chance to Explore a Crypt Twice IV", maxPoints: 1, icon: '🎲', prerequisites: ['equip_craft_4'] }
+      ],
+      // Row 22
+      [
+        { id: 'tar_prod_5', name: "Tar Production V", maxPoints: 20, icon: '🛢️', prerequisites: ['equip_craft_4'] },
+        { id: 'bonus_exp_5', name: "Bonus Experience in Crypts V", maxPoints: 20, icon: '📈', prerequisites: ['tar_prod_5'] }
+      ],
+      // Row 23
+      [
+        { id: 'crypt_march_5', name: "Crypt March Range V", maxPoints: 20, icon: '🗺️', prerequisites: ['tar_prod_5'] },
+        { id: 'tar_cap_5', name: "Tar Capacity V", maxPoints: 20, icon: '📦', prerequisites: ['tar_prod_5'] }
+      ],
+      // Row 24
+      [
+        { id: 'common_eff_3', name: "Common Crypt Exploration Efficiency III", maxPoints: 20, icon: '🏺', prerequisites: ['crypt_march_5','tar_cap_5'] },
+        { id: 'common_cost_3', name: "Common Crypt Exploration Cost III", maxPoints: 1, icon: '💎', prerequisites: ['common_eff_3'] }
+      ],
+      // Row 25
+      [
+        { id: 'rare_eff_3', name: "Rare Crypt Exploration Efficiency III", maxPoints: 20, icon: '💀', prerequisites: ['common_eff_3'] },
+        { id: 'rare_cost_3', name: "Rare Crypt Exploration Cost III", maxPoints: 1, icon: '💎', prerequisites: ['rare_eff_3'] }
+      ],
+      // Row 26
+      [
+        { id: 'epic_eff_2', name: "Epic Crypt Exploration Efficiency II", maxPoints: 20, icon: '👑', prerequisites: ['rare_eff_3'] },
+        { id: 'epic_cost_3', name: "Epic Crypt Exploration Cost III", maxPoints: 1, icon: '💎', prerequisites: ['epic_eff_2'] }
+      ],
+      // Row 27
+      [
+        { id: 'equip_craft_5', name: "Equipment Crafting Speed V", maxPoints: 20, icon: '🔨', prerequisites: ['epic_eff_2'] },
+        { id: 'crypt_twice_5', name: "Chance to Explore a Crypt Twice V", maxPoints: 1, icon: '🎲', prerequisites: ['equip_craft_5'] }
+      ]
+    ];
+
+    // --- State ---
+    let talentPoints = {};
+    let totalAvailablePoints = 100;
+
+    function initializeTalents(){
+      archaeologyTalentData.flat().forEach(t=>{talentPoints[t.id]=0;});
+    }
+
+    // Hub integration
+    function loadFromHub(){
+      try{
+        const hubData = localStorage.getItem('totalBattleTalentHub');
+        if(hubData){
+          const data = JSON.parse(hubData);
+          totalAvailablePoints = data.totalPoints || 100;
+          if(data.treeBuilds && data.treeBuilds.archaeology){
+            Object.keys(data.treeBuilds.archaeology).forEach(id=>{
+              if(talentPoints.hasOwnProperty(id)){talentPoints[id]=data.treeBuilds.archaeology[id];}
+            });
+          }
+        }
+      }catch(e){ console.error('Error loading hub data:', e); }
+    }
+
+    function saveToHub(){
+      try{
+        let hubData = localStorage.getItem('totalBattleTalentHub');
+        let data = hubData ? JSON.parse(hubData) : {
+          totalPoints:100,
+          allocatedPoints:{battle:0,expert:0,economy:0,archaeology:0},
+          treeBuilds:{battle:{},expert:{},economy:{},archaeology:{}}
+        };
+        data.treeBuilds.archaeology = {...talentPoints};
+        data.allocatedPoints.archaeology = Object.values(talentPoints).reduce((a,b)=>a+b,0);
+        localStorage.setItem('totalBattleTalentHub', JSON.stringify(data));
+      }catch(e){ console.error('Error saving to hub:', e); }
+    }
+
+    function getRemainingPoints(){
+      try{
+        const hubData = localStorage.getItem('totalBattleTalentHub');
+        if(hubData){
+          const data = JSON.parse(hubData);
+          const totalAllocated = Object.values(data.allocatedPoints||{}).reduce((a,b)=>a+b,0);
+          return data.totalPoints - totalAllocated;
+        }
+      }catch(e){ console.error('Error calculating remaining points:', e); }
+      return totalAvailablePoints - Object.values(talentPoints).reduce((a,b)=>a+b,0);
+    }
+
+    // Talent logic (AND when multiple prereqs)
+    function isTalentUnlocked(t){
+      if(!t.prerequisites || t.prerequisites.length===0) return true;
+      if(t.prerequisites.length>1){
+        return t.prerequisites.every(id => (talentPoints[id]||0) > 0);
+      }
+      return t.prerequisites.some(id => (talentPoints[id]||0) > 0);
+    }
+
+    // Actions
+    function addOne(id){
+      const t = archaeologyTalentData.flat().find(x=>x.id===id);
+      if(!t || !isTalentUnlocked(t)) return;
+      const remaining = getRemainingPoints();
+      if((talentPoints[id]||0) < t.maxPoints && remaining>0){
+        talentPoints[id]++; saveToHub(); updateDisplay();
+      }
+    }
+    function removeOne(id){
+      if((talentPoints[id]||0) > 0){
+        const dependents = archaeologyTalentData.flat().filter(t => t.prerequisites.includes(id) && (talentPoints[t.id]||0)>0);
+        if(dependents.length>0 && talentPoints[id]===1){ alert("Cannot remove last point - other talents depend on this one!"); return; }
+        talentPoints[id]--; saveToHub(); updateDisplay();
+      }
+    }
+    function addToMax(id){
+      const t = archaeologyTalentData.flat().find(x=>x.id===id);
+      if(!t || !isTalentUnlocked(t)) return;
+      const remaining = getRemainingPoints();
+      const need = t.maxPoints - (talentPoints[id]||0);
+      const canAdd = Math.min(need, remaining);
+      if(canAdd>0){ talentPoints[id]=(talentPoints[id]||0)+canAdd; saveToHub(); updateDisplay(); }
+    }
+    function removeAll(id){
+      if((talentPoints[id]||0)>0){
+        const dependents = archaeologyTalentData.flat().filter(t => t.prerequisites.includes(id) && (talentPoints[t.id]||0)>0);
+        if(dependents.length>0){ alert("Cannot remove all points - other talents depend on this one!"); return; }
+        talentPoints[id]=0; saveToHub(); updateDisplay();
+      }
+    }
+
+    // UI
+    function createTalentCard(t){
+      const card=document.createElement('div'); card.className='talent-card';
+      const isUnlocked = isTalentUnlocked(t);
+      const remaining = getRemainingPoints();
+      const current = talentPoints[t.id]||0;
+
+      if(isUnlocked) card.classList.add('unlocked'); else card.classList.add('locked');
+
+      const canAddOne = isUnlocked && current<t.maxPoints && remaining>0;
+      const canRemoveOne = current>0;
+      const canAddMax = isUnlocked && current<t.maxPoints && remaining>0;
+      const canRemoveAll = current>0;
+
+      card.innerHTML = `
+        <div class="talent-icon">${t.icon}</div>
+        <div class="talent-name">${t.name}</div>
+        <div class="controls-grid">
+          <div class="controls-row">
+            <button class="control-btn remove-btn" onclick="removeOne('${t.id}')" ${!canRemoveOne?'disabled':''}>-</button>
+            <button class="control-btn add-btn" onclick="addOne('${t.id}')" ${!canAddOne?'disabled':''}>+</button>
+          </div>
+          <div class="controls-row">
+            <button class="control-btn remove-btn" onclick="removeAll('${t.id}')" ${!canRemoveAll?'disabled':''}>&lt;&lt;</button>
+            <button class="control-btn add-btn" onclick="addToMax('${t.id}')" ${!canAddMax?'disabled':''}>&gt;&gt;</button>
+          </div>
         </div>
-    </div>
+        <div class="talent-points" style="--progress:${(current/t.maxPoints)*100}%">${current}/${t.maxPoints}</div>
+      `;
+      return card;
+    }
 
-    <div class="tree-container">
-        <div class="talent-tree" id="talentTree">
-            <!-- Talent tree will be generated here -->
-        </div>
-    </div>
+    function renderTalentTree(){
+      const container=document.getElementById('talentTree');
+      container.innerHTML='';
+      archaeologyTalentData.forEach((row,rowIndex)=>{
+        const rowDiv=document.createElement('div'); rowDiv.className='talent-row';
+        row.forEach((t,colIndex)=>{
+          const card=createTalentCard(t); rowDiv.appendChild(card);
 
-    <div class="controls">
-        <h3 style="color: #FFD700; margin-bottom: 10px;">Controls</h3>
-        <button class="control-button" onclick="resetAllTalents()">🔄 Reset This Tree</button>
-        <button class="control-button" onclick="exportBuild()">📋 Export Build</button>
-        <button class="control-button" onclick="importBuild()">📥 Import Build</button>
-        <div style="margin-top: 15px; font-size: 0.8rem; color: #a0aec0;">
-            <strong>Button Controls:</strong><br>
-            • <strong>+</strong>: Add 1 point<br>
-            • <strong>-</strong>: Remove 1 point<br>
-            • <strong>&gt;&gt;</strong>: Add to maximum<br>
-            • <strong>&lt;&lt;</strong>: Remove all points<br>
-            • Must have ≥1 point in prerequisite<br>
-            • + means ALL prerequisites needed
-        </div>
-    </div>
+          if(rowIndex>0 && t.prerequisites.length>0){
+            const v=document.createElement('div'); v.className='connection-line vertical-line';
+            if((talentPoints[t.id]||0)>0 || t.prerequisites.some(p=>(talentPoints[p]||0)>0)){ v.classList.add('active'); }
+            card.appendChild(v);
+          }
+          if(colIndex>0){
+            const h=document.createElement('div'); h.className='connection-line horizontal-line';
+            if((talentPoints[t.id]||0)>0 || (talentPoints[row[colIndex-1].id]||0)>0){ h.classList.add('active'); }
+            card.appendChild(h);
+          }
+        });
+        container.appendChild(rowDiv);
+      });
+    }
 
-    <script>
-        // Archaeology talent tree data structure
-        const archaeologyTalentData = [
-            // Row 1
-            [
-                { id: 'tar_prod_1', name: "Tar Production Speed I", maxPoints: 20, icon: '🛢️', prerequisites: [] },
-                { id: 'bonus_exp_1', name: "Bonus Experience in Crypts I", maxPoints: 20, icon: '📈', prerequisites: ['tar_prod_1'] }
-            ],
-            // Row 2
-            [
-                { id: 'crypt_march_1', name: "Crypt March Range I", maxPoints: 20, icon: '🗺️', prerequisites: ['tar_prod_1'] },
-                { id: 'tar_cap_1', name: "Tar Capacity I", maxPoints: 20, icon: '📦', prerequisites: ['crypt_march_1'] }
-            ],
-            // Row 3
-            [
-                { id: 'equip_craft_1', name: "Equipment Crafting Speed I", maxPoints: 20, icon: '🔨', prerequisites: ['crypt_march_1'] },
-                { id: 'crypt_twice_1', name: "Chance to Explore a Crypt Twice I", maxPoints: 1, icon: '🎲', prerequisites: ['equip_craft_1'] },
-                { id: 'crypt_cost_1', name: "Crypt Exploration Cost I", maxPoints: 1, icon: '💰', prerequisites: ['crypt_twice_1'] }
-            ],
-            // Row 4
-            [
-                { id: 'crypt_eff_1', name: "Crypt Exploration Efficiency I", maxPoints: 20, icon: '⚡', prerequisites: ['equip_craft_1'] }
-            ],
-            // Row 5
-            [
-                { id: 'tar_prod_2', name: "Tar Production Speed II", maxPoints: 20, icon: '🛢️', prerequisites: ['crypt_eff_1'] },
-                { id: 'bonus_exp_2', name: "Bonus Experience in Crypts II", maxPoints: 20, icon: '📈', prerequisites: ['tar_prod_2'] }
-            ],
-            // Row 6
-            [
-                { id: 'crypt_march_2', name: "Crypt March Range II", maxPoints: 20, icon: '🗺️', prerequisites: ['tar_prod_2'] },
-                { id: 'tar_cap_2', name: "Tar Capacity II", maxPoints: 20, icon: '📦', prerequisites: ['crypt_march_2'] }
-            ],
-            // Row 7
-            [
-                { id: 'equip_craft_2', name: "Equipment Crafting Speed II", maxPoints: 20, icon: '🔨', prerequisites: ['crypt_march_2'] },
-                { id: 'crypt_twice_2', name: "Chance to Explore a Crypt Twice II", maxPoints: 1, icon: '🎲', prerequisites: ['equip_craft_2'] },
-                { id: 'crypt_cost_2', name: "Crypt Exploration Cost II", maxPoints: 1, icon: '💰', prerequisites: ['crypt_twice_2'] }
-            ],
-            // Row 8
-            [
-                { id: 'crypt_eff_2', name: "Crypt Exploration Efficiency II", maxPoints: 20, icon: '⚡', prerequisites: ['equip_craft_2'] }
-            ],
-            // Row 9
-            [
-                { id: 'tar_prod_3', name: "Tar Production Speed III", maxPoints: 20, icon: '🛢️', prerequisites: ['crypt_eff_2'] },
-                { id: 'bonus_exp_3', name: "Bonus Experience in Crypts III", maxPoints: 20, icon: '📈', prerequisites: ['tar_prod_3'] }
-            ],
-            // Row 10
-            [
-                { id: 'crypt_march_3', name: "Crypt March Range III", maxPoints: 20, icon: '🗺️', prerequisites: ['tar_prod_3'] },
-                { id: 'tar_cap_3', name: "Tar Capacity III", maxPoints: 20, icon: '📦', prerequisites: ['crypt_march_3'] }
-            ],
-            // Row 11
-            [
-                { id: 'common_eff_1', name: "Common Crypt Exploration Efficiency I", maxPoints: 20, icon: '🏺', prerequisites: ['crypt_march_3'] },
-                { id: 'common_cost_1', name: "Common Crypt Exploration Cost I", maxPoints: 1, icon: '💎', prerequisites: ['common_eff_1'] }
-            ],
-            // Row 12
-            [
-                { id: 'rare_eff_1', name: "Rare Crypt Exploration Efficiency I", maxPoints: 20, icon: '💀', prerequisites: ['common_eff_1'] },
-                { id: 'rare_cost_1', name: "Rare Crypt Exploration Cost I", maxPoints: 1, icon: '💎', prerequisites: ['rare_eff_1'] }
-            ],
-            // Row 13
-            [
-                { id: 'epic_eff_1', name: "Epic Crypt Exploration Efficiency I", maxPoints: 20, icon: '👑', prerequisites: ['rare_eff_1'] },
-                { id: 'epic_cost_1', name: "Epic Crypt Exploration Cost I", maxPoints: 1, icon: '💎', prerequisites: ['epic_eff_1'] }
-            ],
-            // Row 14
-            [
-                { id: 'crypt_eff_3', name: "Crypt Exploration Efficiency III", maxPoints: 20, icon: '⚡', prerequisites: ['epic_eff_1'] },
-                { id: 'crypt_twice_3', name: "Chance to Explore a Crypt Twice III", maxPoints: 1, icon: '🎲', prerequisites: ['crypt_eff_3'] },
-                { id: 'crypt_cost_3', name: "Crypt Exploration Cost III", maxPoints: 1, icon: '💰', prerequisites: ['crypt_twice_3'] }
-            ],
-            // Row 15
-            [
-                { id: 'equip_craft_3', name: "Equipment Crafting Speed III", maxPoints: 20, icon: '🔨', prerequisites: ['crypt_eff_3'] }
-            ],
-            // Row 16
-            [
-                { id: 'tar_prod_4', name: "Tar Production IV", maxPoints: 20, icon: '🛢️', prerequisites: ['equip_craft_3'] },
-                { id: 'bonus_exp_4', name: "Bonus Experience in Crypts IV", maxPoints: 20, icon: '📈', prerequisites: ['tar_prod_4'] }
-            ],
-            // Row 17 - Special AND requirement (+ means both needed)
-            [
-                { id: 'crypt_march_4', name: "Crypt March Range IV", maxPoints: 20, icon: '🗺️', prerequisites: ['tar_prod_4'] },
-                { id: 'tar_cap_4', name: "Tar Capacity IV", maxPoints: 20, icon: '📦', prerequisites: ['tar_prod_4'] }
-            ],
-            // Row 18
-            [
-                { id: 'common_eff_2', name: "Common Crypt Exploration Efficiency II", maxPoints: 20, icon: '🏺', prerequisites: ['crypt_march_4', 'tar_cap_4'] },
-                { id: 'common_cost_2', name: "Common Crypt Exploration Cost II", maxPoints: 1, icon: '💎', prerequisites: ['common_eff_2'] }
-            ],
-            // Row 19
-            [
-                { id: 'rare_eff_2', name: "Rare Crypt Exploration Efficiency II", maxPoints: 20, icon: '💀', prerequisites: ['common_eff_2'] },
-                { id: 'rare_cost_2', name: "Rare Crypt Exploration Cost II", maxPoints: 1, icon: '💎', prerequisites: ['rare_eff_2'] }
-            ],
-            // Row 20
-            [
-                { id: 'epic_eff_3', name: "Epic Crypt Exploration Efficiency III", maxPoints: 20, icon: '👑', prerequisites: ['rare_eff_2'] },
-                { id: 'epic_cost_2', name: "Epic Crypt Exploration Cost II", maxPoints: 1, icon: '💎', prerequisites: ['epic_eff_3'] }
-            ],
-            // Row 21
-            [
-                { id: 'equip_craft_4', name: "Equipment Crafting Speed IV", maxPoints: 20, icon: '🔨', prerequisites: ['epic_eff_3'] },
-                { id: 'crypt_twice_4', name: "Chance to Explore a Crypt Twice IV", maxPoints: 1, icon: '🎲', prerequisites: ['equip_craft_4'] }
-            ],
-            // Row 22
-            [
-                { id: 'tar_prod_5', name: "Tar Production V", maxPoints: 20, icon: '🛢️', prerequisites: ['equip_craft_4'] },
-                { id: 'bonus_exp_5', name: "Bonus Experience in Crypts V", maxPoints: 20, icon: '📈', prerequisites: ['tar_prod_5'] }
-            ],
-            // Row 23 - Another AND requirement
-            [
-                { id: 'crypt_march_5', name: "Crypt March Range V", maxPoints: 20, icon: '🗺️', prerequisites: ['tar_prod_5'] },
-                { id: 'tar_cap_5', name: "Tar Capacity V", maxPoints: 20, icon: '📦', prerequisites: ['tar_prod_5'] }
-            ],
-            // Row 24
-            [
-                { id: 'common_eff_3', name: "Common Crypt Exploration Efficiency III", maxPoints: 20, icon: '🏺', prerequisites: ['crypt_march_5', 'tar_cap_5'] },
-                { id: 'common_cost_3', name: "Common Crypt Exploration Cost III", maxPoints: 1, icon: '💎', prerequisites: ['common_eff_3'] }
-            ],
-            // Row 25
-            [
-                { id: 'rare_eff_3', name: "Rare Crypt Exploration Efficiency III", maxPoints: 20, icon: '💀', prerequisites: ['common_eff_3'] },
-                { id: 'rare_cost_3', name: "Rare Crypt Exploration Cost III", maxPoints: 1, icon: '💎', prerequisites: ['rare_eff_3'] }
-            ],
-            // Row 26
-            [
-                { id: 'epic_eff_2', name: "Epic Crypt Exploration Efficiency II", maxPoints: 20, icon: '👑', prerequisites: ['rare_eff_3'] },
-                { id: 'epic_cost_3', name: "Epic Crypt Exploration Cost III", maxPoints: 1, icon: '💎', prerequisites: ['epic_eff_2'] }
-            ],
-            // Row 27
-            [
-                { id: 'equip_craft_5', name: "Equipment Crafting Speed V", maxPoints: 20, icon: '🔨', prerequisites: ['epic_eff_2'] },
-                { id: 'crypt_twice_5', name: "Chance to Explore a Crypt Twice V", maxPoints: 1, icon: '🎲', prerequisites: ['equip_craft_5'] }
-            ]
-        ];
+    function updateDisplay(){
+      const remaining=getRemainingPoints();
+      document.getElementById('pointsText').textContent = remaining;
+      renderTalentTree();
+    }
 
-        // Game state
-        let talentPoints = {};
-        let totalAvailablePoints = 100;
+    // Modal helpers
+    function openModal(){ document.getElementById('infoModal').style.display='flex'; }
+    function closeModal(){ document.getElementById('infoModal').style.display='none'; }
+    window.onclick = e => { const m=document.getElementById('infoModal'); if(e.target===m) closeModal(); };
 
-        // Initialize
-        function initializeTalents() {
-            archaeologyTalentData.flat().forEach(talent => {
-                talentPoints[talent.id] = 0;
-            });
-        }
+    // Nav
+    function returnToHub(){ saveToHub(); window.location.href='index.html'; }
 
-        // Hub integration
-        function loadFromHub() {
-            try {
-                const hubData = localStorage.getItem('totalBattleTalentHub');
-                if (hubData) {
-                    const data = JSON.parse(hubData);
-                    totalAvailablePoints = data.totalPoints || 100;
-                    
-                    if (data.treeBuilds && data.treeBuilds.archaeology) {
-                        Object.keys(data.treeBuilds.archaeology).forEach(talentId => {
-                            if (talentPoints.hasOwnProperty(talentId)) {
-                                talentPoints[talentId] = data.treeBuilds.archaeology[talentId];
-                            }
-                        });
-                    }
-                }
-            } catch (e) {
-                console.error('Error loading hub data:', e);
-            }
-        }
+    function resetAllTalents(){
+      if(confirm('Are you sure you want to reset the Archaeology talent tree?')){
+        initializeTalents(); saveToHub(); updateDisplay();
+      }
+    }
+    function exportBuild(){
+      const build = JSON.stringify({ totalPoints: totalAvailablePoints, talents: talentPoints });
+      navigator.clipboard.writeText(build).then(()=>{ alert('Build copied to clipboard!'); closeModal(); });
+    }
+    function importBuild(){
+      const input = prompt('Paste your build data here:');
+      if(input){
+        try{
+          const build = JSON.parse(input);
+          talentPoints = build.talents; saveToHub(); updateDisplay();
+          alert('Build imported successfully!'); closeModal();
+        }catch(e){ alert('Invalid build data!'); }
+      }
+    }
 
-        function saveToHub() {
-            try {
-                let hubData = localStorage.getItem('totalBattleTalentHub');
-                let data = hubData ? JSON.parse(hubData) : {
-                    totalPoints: 100,
-                    allocatedPoints: { battle: 0, expert: 0, economy: 0, archaeology: 0 },
-                    treeBuilds: { battle: {}, expert: {}, economy: {}, archaeology: {} }
-                };
-                
-                data.treeBuilds.archaeology = { ...talentPoints };
-                data.allocatedPoints.archaeology = Object.values(talentPoints).reduce((a, b) => a + b, 0);
-                
-                localStorage.setItem('totalBattleTalentHub', JSON.stringify(data));
-            } catch (e) {
-                console.error('Error saving to hub:', e);
-            }
-        }
-
-        function getRemainingPoints() {
-            try {
-                const hubData = localStorage.getItem('totalBattleTalentHub');
-                if (hubData) {
-                    const data = JSON.parse(hubData);
-                    const totalAllocated = Object.values(data.allocatedPoints || {}).reduce((a, b) => a + b, 0);
-                    return data.totalPoints - totalAllocated;
-                }
-            } catch (e) {
-                console.error('Error calculating remaining points:', e);
-            }
-            return totalAvailablePoints - Object.values(talentPoints).reduce((a, b) => a + b, 0);
-        }
-
-        // Talent functions
-        function isTalentUnlocked(talent) {
-            if (!talent.prerequisites || talent.prerequisites.length === 0) {
-                return true;
-            }
-            
-            // For multiple prerequisites (AND logic), ALL must have at least 1 point
-            if (talent.prerequisites.length > 1) {
-                return talent.prerequisites.every(prereqId => {
-                    const prereqPoints = talentPoints[prereqId] || 0;
-                    return prereqPoints > 0;
-                });
-            } else {
-                // Single prerequisite (OR logic)
-                return talent.prerequisites.some(prereqId => {
-                    const prereqPoints = talentPoints[prereqId] || 0;
-                    return prereqPoints > 0;
-                });
-            }
-        }
-
-        function addOne(talentId) {
-            const talent = archaeologyTalentData.flat().find(t => t.id === talentId);
-            if (!talent || !isTalentUnlocked(talent)) return;
-            
-            const remaining = getRemainingPoints();
-            if (talentPoints[talentId] < talent.maxPoints && remaining > 0) {
-                talentPoints[talentId]++;
-                saveToHub();
-                updateDisplay();
-            }
-        }
-
-        function removeOne(talentId) {
-            if (talentPoints[talentId] > 0) {
-                const dependentTalents = archaeologyTalentData.flat().filter(t => 
-                    t.prerequisites.includes(talentId) && talentPoints[t.id] > 0
-                );
-                
-                if (dependentTalents.length > 0) {
-                    alert("Cannot remove all points - other talents depend on this one!");
-                    return;
-                }
-                
-                talentPoints[talentId] = 0;
-                saveToHub();
-                updateDisplay();
-            }
-        }
-
-        // UI Functions
-        function createTalentCard(talent) {
-            const card = document.createElement('div');
-            card.className = 'talent-card';
-            
-            const isUnlocked = isTalentUnlocked(talent);
-            const remaining = getRemainingPoints();
-            const currentPoints = talentPoints[talent.id];
-            
-            if (isUnlocked) {
-                card.classList.add('unlocked');
-            } else {
-                card.classList.add('locked');
-            }
-
-            const canAddOne = isUnlocked && currentPoints < talent.maxPoints && remaining > 0;
-            const canRemoveOne = currentPoints > 0;
-            const canAddMax = isUnlocked && currentPoints < talent.maxPoints && remaining > 0;
-            const canRemoveAll = currentPoints > 0;
-
-            const requirementText = talent.prerequisites.length > 1 ? 
-                `Requires ALL: ${talent.prerequisites.map(p => 
-                    archaeologyTalentData.flat().find(t => t.id === p)?.name || p
-                ).join(' + ')}` :
-                talent.prerequisites.length > 0 ? 
-                `Requires: ${talent.prerequisites.map(p => 
-                    archaeologyTalentData.flat().find(t => t.id === p)?.name || p
-                ).join(', ')}` : 'No prerequisites';
-
-            card.innerHTML = `
-                <div class="talent-icon">${talent.icon}</div>
-                <div class="talent-name">${talent.name}</div>
-                <div class="controls-grid">
-                    <div class="controls-row">
-                        <button class="control-btn remove-btn" onclick="removeOne('${talent.id}')" ${!canRemoveOne ? 'disabled' : ''}>-</button>
-                        <button class="control-btn add-btn" onclick="addOne('${talent.id}')" ${!canAddOne ? 'disabled' : ''}>+</button>
-                    </div>
-                    <div class="controls-row">
-                        <button class="control-btn remove-btn" onclick="removeAll('${talent.id}')" ${!canRemoveAll ? 'disabled' : ''}>&lt;&lt;</button>
-                        <button class="control-btn add-btn" onclick="addToMax('${talent.id}')" ${!canAddMax ? 'disabled' : ''}>&gt;&gt;</button>
-                    </div>
-                </div>
-                <div class="points-display">${currentPoints}/${talent.maxPoints}</div>
-            `;
-
-            return card;
-        }
-
-        function renderTalentTree() {
-            const container = document.getElementById('talentTree');
-            container.innerHTML = '';
-
-            archaeologyTalentData.forEach((row, rowIndex) => {
-                const rowDiv = document.createElement('div');
-                rowDiv.className = 'talent-row';
-
-                row.forEach((talent, colIndex) => {
-                    const card = createTalentCard(talent);
-                    rowDiv.appendChild(card);
-
-                    if (rowIndex > 0 && talent.prerequisites.length > 0) {
-                        const line = document.createElement('div');
-                        line.className = 'connection-line vertical-line';
-                        
-                        if (talentPoints[talent.id] > 0 || 
-                            talent.prerequisites.some(p => talentPoints[p] > 0)) {
-                            line.classList.add('active');
-                        }
-                        card.appendChild(line);
-                    }
-
-                    if (colIndex > 0) {
-                        const line = document.createElement('div');
-                        line.className = 'connection-line horizontal-line';
-                        
-                        if (talentPoints[talent.id] > 0 || talentPoints[row[colIndex-1].id] > 0) {
-                            line.classList.add('active');
-                        }
-                        card.appendChild(line);
-                    }
-                });
-
-                container.appendChild(rowDiv);
-            });
-        }
-
-        function updateDisplay() {
-            const thisTreePoints = Object.values(talentPoints).reduce((a, b) => a + b, 0);
-            const remaining = getRemainingPoints();
-            const otherTreesPoints = totalAvailablePoints - remaining - thisTreePoints;
-
-            document.getElementById('totalPoints').textContent = totalAvailablePoints;
-            document.getElementById('thisTreePoints').textContent = thisTreePoints;
-            document.getElementById('otherTreesPoints').textContent = otherTreesPoints;
-            document.getElementById('remainingPoints').textContent = remaining;
-            
-            renderTalentTree();
-        }
-
-        // Navigation functions
-        function returnToHub() {
-            saveToHub();
-            window.location.href = 'index.html';
-        }
-
-        function switchTree(treeFile) {
-            saveToHub();
-            window.location.href = treeFile;
-        }
-
-        function resetAllTalents() {
-            if (confirm('Are you sure you want to reset the Archaeology talent tree?')) {
-                initializeTalents();
-                saveToHub();
-                updateDisplay();
-            }
-        }
-
-        function exportBuild() {
-            const build = JSON.stringify({
-                totalPoints: totalAvailablePoints,
-                talents: talentPoints
-            });
-            navigator.clipboard.writeText(build).then(() => {
-                alert('Build copied to clipboard!');
-            });
-        }
-
-        function importBuild() {
-            const input = prompt('Paste your build data here:');
-            if (input) {
-                try {
-                    const build = JSON.parse(input);
-                    talentPoints = build.talents;
-                    saveToHub();
-                    updateDisplay();
-                    alert('Build imported successfully!');
-                } catch (e) {
-                    alert('Invalid build data!');
-                }
-            }
-        }
-
-        // Initialize
-        initializeTalents();
-        loadFromHub();
-        updateDisplay();
-    </script>
+    // Init
+    initializeTalents();
+    loadFromHub();
+    updateDisplay();
+  </script>
 </body>
 </html>
-                );
-                
-                if (dependentTalents.length > 0 && talentPoints[talentId] === 1) {
-                    alert("Cannot remove last point - other talents depend on this one!");
-                    return;
-                }
-                
-                talentPoints[talentId]--;
-                saveToHub();
-                updateDisplay();
-            }
-        }
-
-        function addToMax(talentId) {
-            const talent = archaeologyTalentData.flat().find(t => t.id === talentId);
-            if (!talent || !isTalentUnlocked(talent)) return;
-            
-            const remaining = getRemainingPoints();
-            const currentPoints = talentPoints[talentId];
-            const pointsToMax = talent.maxPoints - currentPoints;
-            const canAdd = Math.min(pointsToMax, remaining);
-            
-            if (canAdd > 0) {
-                talentPoints[talentId] += canAdd;
-                saveToHub();
-                updateDisplay();
-            }
-        }
-
-        function removeAll(talentId) {
-            if (talentPoints[talentId] > 0) {
-                const dependentTalents = archaeologyTalentData.flat().filter(t => 
-                    t.prerequisites.includes(talentId) && talentPoints[t.id] > 0
