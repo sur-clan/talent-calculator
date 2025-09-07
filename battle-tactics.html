@@ -8,24 +8,17 @@
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
 
-    
+    body{
+      background:linear-gradient(135deg,#1a2333,#2d3748);
+      color:#fff;
+      font-family:Arial, sans-serif;
+      min-height:100vh;
+      overflow-x:hidden; /* prevent horizontal scroll */
+      /* header (56) + points bar (44) */
+      padding-top:100px;
+      padding-bottom:80px;
+    }
 
-
-body{
-  background-image: linear-gradient(135deg, rgba(26,35,51,0.8), rgba(45,55,72,0.8)),
-                    url('scales.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;  /* doesn’t move on scroll */
-  color:#fff;
-  font-family: Arial, sans-serif;
-  min-height:100vh;
-  overflow-x:hidden;
-  padding-top:100px;
-  padding-bottom:80px;
-}
-    
     /* ===== HEADER ===== */
     .header{
       position:fixed;top:0;left:0;right:0;height:56px;
@@ -54,16 +47,10 @@ body{
     .points-emblem{font-size:18px;filter:drop-shadow(0 1px 0 rgba(0,0,0,.4));opacity:.9}
     .points-bar #pointsText{color:#ffd777;font-weight:700;font-size:16px}
 
-  .tree-container {
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: calc(100vh - 150px);
-  width: 100%;
-
-
-}
+    .tree-container{
+      padding:20px;display:flex;justify-content:center;align-items:flex-start;
+      min-height:calc(100vh - 150px);width:100%;overflow-x:hidden
+    }
     .talent-tree{display:flex;flex-direction:column;align-items:center;gap:20px;position:relative;margin:0 auto}
     .talent-row{display:flex;align-items:center;justify-content:center;gap:30px;position:relative;min-height:340px}
 
@@ -168,47 +155,6 @@ body{
 
       .tree-container{padding:10px 6px}
     }
-
-
-
-
-/* Center everything inside each talent card */
-.talent-card{
-  display:flex;                /* NEW */
-  flex-direction:column;       /* NEW */
-  align-items:center;          /* NEW */
-}
-
-/* Make sure the buttons grid stays centered on the card */
-.controls-grid{
-  margin:0 auto;               /* already there, keep */
-  display:flex;                /* NEW */
-  flex-direction:column;       /* NEW */
-  align-items:center;          /* NEW */
-}
-.controls-row{
-  width:100%;                  /* NEW – rows use full grid width */
-  display:flex;                /* already there, keep */
-  justify-content:space-between; /* NEW – even spacing inside the row */
-}
-
-/* --- Tablet and down: keep buttons centered and trim connectors --- */
-@media (max-width:768px){
-  .horizontal-line{ display:none !important; }  /* hide horizontal connectors */
-  .controls-grid{ width:120px; }                /* a touch wider helps centering */
-}
-
-/* --- Phones: 3 across, centered buttons, no horizontal lines --- */
-@media (max-width:480px){
-  .horizontal-line{ display:none !important; }  /* hide horizontal connectors */
-
-  /* keep content perfectly centered on narrow cards */
-  .controls-grid{ width:100px; }                /* adjust to your card width */
-  .controls-row{ gap:6px; justify-content:center; }
-  .control-btn{ flex:0 0 46px; }                /* fixed button width for symmetry */
-}
-
-
   </style>
 </head>
 <body>
@@ -505,7 +451,3 @@ body{
   </script>
 </body>
 </html>
-
-
-
-
