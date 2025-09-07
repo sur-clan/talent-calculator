@@ -400,6 +400,7 @@
         }
       });
     }
+window.sendTalentCalcResize && window.sendTalentCalcResize(); // <— add this
 
     // Handle total points change
     document.getElementById('totalPoints').addEventListener('change', function() {
@@ -458,10 +459,14 @@
     // Modal functions
     function openModal() {
       document.getElementById('infoModal').style.display = 'flex';
+  window.sendTalentCalcResize && window.sendTalentCalcResize(); // <— added
+
     }
     
     function closeModal() {
       document.getElementById('infoModal').style.display = 'none';
+  window.sendTalentCalcResize && window.sendTalentCalcResize(); // <— added
+
     }
 
     // Export all builds
@@ -569,14 +574,17 @@
     );
     parent.postMessage({ type: 'surTalentCalcResize', height: h }, '*');
   }
+  window.sendTalentCalcResize = sendSize; // <— expose
+
   window.addEventListener('load', sendSize);
   window.addEventListener('resize', sendSize);
-  // If your app changes height after button clicks etc., call sendSize() there too.
 })();
 </script>
 
+
 </body>
 </html>
+
 
 
 
