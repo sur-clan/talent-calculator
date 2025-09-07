@@ -238,9 +238,12 @@
     <div class="points-section">
       <h2>Total Available Talent Points</h2>
       <div>
-        <label for="totalPoints">Enter Your Total Talent Points:</label>
+        <label for="totalPoints">Enter Your Total Available Talent Points Here: </label>
         <input type="number" id="totalPoints" class="points-input" value="100" min="0" max="9999">
       </div>
+
+
+
       <div class="points-display">
         <div>Allocated: <span id="allocatedPoints">0</span></div>
         <div>Remaining: <span class="points-remaining" id="remainingPointsText">100</span></div>
@@ -320,7 +323,7 @@
   <!-- Modal -->
   <div class="modal" id="infoModal">
     <div class="modal-content">
-      <h3 class="modal-title">Controls</h3>
+      <h3 class="modal-title">Talent Tools</h3>
       <button class="modal-button" onclick="exportAllBuilds()">Export All Builds</button>
       <button class="modal-button" onclick="importAllBuilds()">Import All Builds</button>
       <div class="control-info">
