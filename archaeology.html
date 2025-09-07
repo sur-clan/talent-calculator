@@ -21,13 +21,17 @@
     }
     body::before{
       content:"";
-      position:fixed;inset:0;z-index:-2;
+      position:fixed;
+      inset:0;
+      z-index:-2;
       background:url('scales.jpg') center/cover no-repeat fixed;
       transform:translateZ(0);
     }
     body::after{
       content:"";
-      position:fixed;inset:0;z-index:-1;
+      position:fixed;
+      inset:0;
+      z-index:-1;
       background:linear-gradient(135deg, rgba(10,14,20,.75), rgba(20,26,36,.75));
       pointer-events:none;
     }
@@ -48,39 +52,14 @@
       text-shadow:0 1px 0 rgba(0,0,0,.4)
     }
 
-    /* ===== POINTS BAR (now with visual progress) ===== */
+    /* ===== POINTS BAR ===== */
     .points-bar{
       position:fixed;top:56px;left:0;right:0;height:44px;
       background:#0f3c55;border-bottom:2px solid #C89B3C;
-      display:flex;align-items:center;justify-content:center;gap:12px;z-index:900;
-      padding:0 12px;
+      display:flex;align-items:center;justify-content:center;gap:10px;z-index:900
     }
     .points-emblem{font-size:18px;filter:drop-shadow(0 1px 0 rgba(0,0,0,.4));opacity:.9}
-
-    .points-track{
-      position:relative;
-      width:clamp(230px, 58vw, 520px);
-      height:14px;
-      border:1px solid #C89B3C;
-      border-radius:999px;
-      background:rgba(255,255,255,0.08);
-      overflow:hidden;
-    }
-    .points-fill{
-      position:absolute;top:0;left:0;height:100%;
-      width:0%;
-      background:linear-gradient(90deg,#31838f,#155879);
-      transition:width .3s ease;
-    }
-    .points-label{
-      position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-      font-weight:700;font-size:12px;color:#ffd777;text-shadow:0 1px 0 rgba(0,0,0,.6);pointer-events:none;
-    }
-
-    .points-remaining{
-      font-size:12px;color:#ffd777;font-weight:700;min-width:max-content;
-      text-shadow:0 1px 0 rgba(0,0,0,.4)
-    }
+    .points-bar #pointsText{color:#ffffff;font-weight:700;font-size:16px}
 
     /* ===== TREE LAYOUT ===== */
     .tree-container{
@@ -153,7 +132,6 @@
       .talent-points{font-size:.95rem;padding:4px 8px}
       .tree-container{padding:12px 6px}
       .horizontal-line{width:12px;left:-12px}
-      .points-track{width:clamp(220px, 62vw, 480px)}
     }
 
     /* ====== Phones (≤480px) — 3 across, no wrap ====== */
@@ -168,8 +146,6 @@
       .talent-points{font-size:.9rem;padding:3px 6px;bottom:6px}
       .tree-container{padding:10px 3px}
       .horizontal-line{width:6px;left:-6px}
-      .points-track{width:78vw}
-      .points-remaining{display:none} /* keep it tidy on tiny screens */
     }
   </style>
 </head>
@@ -181,14 +157,10 @@
     <button class="info-button" onclick="openModal()">ⓘ</button>
   </div>
 
-  <!-- Points bar with visual progress -->
+  <!-- Points bar -->
   <div class="points-bar">
     <span class="points-emblem">🏺</span>
-    <div class="points-track" aria-label="Total points used progress">
-      <div class="points-fill" id="pointsFill"></div>
-      <div class="points-label"><span id="usedPoints">0</span>/<span id="totalPoints">100</span> used</div>
-    </div>
-    <div class="points-remaining">Remaining: <span id="pointsText">100</span></div>
+    <span id="pointsText">0</span>
   </div>
 
   <!-- Tree -->
@@ -221,7 +193,7 @@
   </div>
 
   <script>
-    /* ===== Archaeology Talent Data (your structure) ===== */
+    /* ===== Archaeology Talent Data (kept from your page) ===== */
 const archaeologyTalentData = [
   // Row 1
   [
@@ -360,6 +332,7 @@ const archaeologyTalentData = [
   ]
 ];
 
+
     // --- State ---
     let talentPoints = {};
     let totalAvailablePoints = 100;
@@ -404,25 +377,13 @@ const archaeologyTalentData = [
         if(hubData){
           const data = JSON.parse(hubData);
           const totalAllocated = Object.values(data.allocatedPoints||{}).reduce((a,b)=>a+b,0);
-          return (data.totalPoints||100) - totalAllocated;
+          return data.totalPoints - totalAllocated;
         }
       }catch(e){ console.error('Error calculating remaining points:', e); }
       return totalAvailablePoints - Object.values(talentPoints).reduce((a,b)=>a+b,0);
     }
 
-    function getUsedOverall(){
-      try{
-        const hubData = localStorage.getItem('totalBattleTalentHub');
-        if(hubData){
-          const data = JSON.parse(hubData);
-          return Object.values(data.allocatedPoints||{}).reduce((a,b)=>a+b,0);
-        }
-      }catch(e){ console.error('Error calculating used points:', e); }
-      // fallback: only this page's allocation
-      return Object.values(talentPoints).reduce((a,b)=>a+b,0);
-    }
-
-    // Talent unlocks (AND when multiple prereqs)
+    // Talent logic (AND when multiple prereqs)
     function isTalentUnlocked(t){
       if(!t.prerequisites || t.prerequisites.length===0) return true;
       if(t.prerequisites.length>1){
@@ -474,7 +435,7 @@ const archaeologyTalentData = [
 
       const canAddOne = isUnlocked && current<t.maxPoints && remaining>0;
       const canRemoveOne = current>0;
-      const canAddMax  = isUnlocked && current<t.maxPoints && remaining>0;
+      const canAddMax = isUnlocked && current<t.maxPoints && remaining>0;
       const canRemoveAll = current>0;
 
       card.innerHTML = `
@@ -519,22 +480,8 @@ const archaeologyTalentData = [
     }
 
     function updateDisplay(){
-      // Numbers
-      const remaining = getRemainingPoints();
-      const usedOverall = getUsedOverall();
-      const total = totalAvailablePoints || 100;
-
-      // Texts
+      const remaining=getRemainingPoints();
       document.getElementById('pointsText').textContent = remaining;
-      document.getElementById('usedPoints').textContent  = usedOverall;
-      document.getElementById('totalPoints').textContent = total;
-
-      // Visual fill
-      const pct = Math.max(0, Math.min(100, (usedOverall / total) * 100));
-      const fill = document.getElementById('pointsFill');
-      if(fill) fill.style.width = pct + '%';
-
-      // Cards
       renderTalentTree();
     }
 
@@ -543,8 +490,9 @@ const archaeologyTalentData = [
     function closeModal(){ document.getElementById('infoModal').style.display='none'; }
     window.onclick = e => { const m=document.getElementById('infoModal'); if(e.target===m) closeModal(); };
 
-    // Nav & Utilities
+    // Nav
     function returnToHub(){ saveToHub(); window.location.href='index.html'; }
+
     function resetAllTalents(){
       if(confirm('Are you sure you want to reset the Archaeology talent tree?')){
         initializeTalents(); saveToHub(); updateDisplay();
