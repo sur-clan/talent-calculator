@@ -557,7 +557,26 @@
     // Start the application
     initialize();
   </script>
+
+<script>
+(function () {
+  function sendSize() {
+    const h = Math.max(
+      document.documentElement.scrollHeight,
+      document.body.scrollHeight,
+      document.documentElement.offsetHeight,
+      document.body.offsetHeight
+    );
+    parent.postMessage({ type: 'surTalentCalcResize', height: h }, '*');
+  }
+  window.addEventListener('load', sendSize);
+  window.addEventListener('resize', sendSize);
+  // If your app changes height after button clicks etc., call sendSize() there too.
+})();
+</script>
+
 </body>
 </html>
+
 
 
