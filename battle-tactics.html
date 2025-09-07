@@ -47,10 +47,18 @@
     .points-emblem{font-size:18px;filter:drop-shadow(0 1px 0 rgba(0,0,0,.4));opacity:.9}
     .points-bar #pointsText{color:#ffd777;font-weight:700;font-size:16px}
 
-    .tree-container{
-      padding:20px;display:flex;justify-content:center;align-items:flex-start;
-      min-height:calc(100vh - 150px);width:100%;overflow-x:hidden
-    }
+  .tree-container {
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: calc(100vh - 150px);
+  width: 100%;
+
+  /* NEW background */
+  background: url('scales.jpg') repeat;
+  background-size: cover;  /* makes it scale nicely */
+}
     .talent-tree{display:flex;flex-direction:column;align-items:center;gap:20px;position:relative;margin:0 auto}
     .talent-row{display:flex;align-items:center;justify-content:center;gap:30px;position:relative;min-height:340px}
 
@@ -492,5 +500,6 @@
   </script>
 </body>
 </html>
+
 
 
