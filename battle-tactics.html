@@ -78,7 +78,14 @@
     .talent-points{
       background:rgba(0,0,0,.9);border:2px solid #C89B3C;border-radius:12px;
       padding:6px 12px;font-weight:bold;color:#C89B3C;font-size:1.1rem;text-align:center;
-      position:absolute;bottom:8px;left:50%;transform:translateX(-50%)
+      position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+      overflow:hidden;position:relative
+    }
+    .talent-points::before{
+      content:'';position:absolute;top:0;left:0;height:100%;
+      background:linear-gradient(135deg,rgba(200,155,60,.3),rgba(200,155,60,.5));
+      transition:width .3s ease;z-index:-1;
+      width:var(--progress,0%)
     }
 
     .connection-line{position:absolute;background:#718096;z-index:1;transition:all .3s ease}
@@ -148,7 +155,7 @@
         padding:10px;
       }
 
-      .talent-icon{width:44px;height:44px;f-size:1.2rem}
+      .talent-icon{width:44px;height:44px;font-size:1.2rem}
       .talent-name{font-size:.65rem;height:36px;margin-bottom:8px}
       .controls-grid{width:102px;margin:0 auto 12px}
       .control-btn{height:26px;font-size:.8rem}
@@ -202,56 +209,164 @@
   </div>
 
   <script>
-    // --- Battle Tactics data ---
-    const talentData = [
-      // Row 1
-      [{ id:'guards_train_1', name:"Guardsmen's Training Speed I", maxPoints:20, icon:'⚔️', prerequisites:[] }],
-      // Row 2
-      [
-        { id:'spec_train_1', name:"Specialists' Training Speed I", maxPoints:20, icon:'🛡️', prerequisites:['guards_train_1'] },
-        { id:'spec_march_1', name:"Specialists' March Speed I", maxPoints:20, icon:'🏃', prerequisites:['spec_train_1'] },
-        { id:'spec_health_1', name:"Specialists' Health I", maxPoints:20, icon:'❤️', prerequisites:['spec_march_1'] }
-      ],
-      // Row 3
-      [
-        { id:'monster_train_1', name:"Monsters' Training Speed I", maxPoints:20, icon:'👹', prerequisites:['spec_train_1'] },
-        { id:'monster_march_1', name:"Monsters' March Speed I", maxPoints:20, icon:'🦶', prerequisites:['monster_train_1'] },
-        { id:'monster_health_1', name:"Monsters' Health I", maxPoints:20, icon:'💪', prerequisites:['monster_march_1'] }
-      ],
-      // Row 4
-      [
-        { id:'siege_train_1', name:"Siege Engines' Training Speed I", maxPoints:20, icon:'🏗️', prerequisites:['monster_train_1'] },
-        { id:'siege_march_1', name:"Siege Engines' March Speed I", maxPoints:20, icon:'⚙️', prerequisites:['siege_train_1'] },
-        { id:'eng_health_1', name:"Engineer Corps' Health I", maxPoints:20, icon:'🔧', prerequisites:['siege_march_1'] }
-      ],
-      // Row 5
-      [{ id:'guards_march_1', name:"Guardsmen's March Speed I", maxPoints:20, icon:'🚶', prerequisites:['siege_train_1'] }],
-      // Row 6
-      [
-        { id:'guards_health_1', name:"Guardsmen's Health I", maxPoints:20, icon:'❤️', prerequisites:['guards_march_1'] },
-        { id:'army_carry_1', name:"Army Carrying Capacity I", maxPoints:20, icon:'🎒', prerequisites:['guards_health_1'] }
-      ],
-      // Row 7
-      [
-        { id:'guards_str_1', name:"Guardsmen's Strength I", maxPoints:20, icon:'💪', prerequisites:['guards_health_1'] },
-        { id:'guards_double_1', name:"Chance for Guardsmen Double Damage I", maxPoints:1, icon:'⚡', prerequisites:['guards_str_1'] }
-      ],
-      // Row 8
-      [
-        { id:'spec_str_1', name:"Specialists' Strength I", maxPoints:20, icon:'🗡️', prerequisites:['guards_str_1'] },
-        { id:'spec_double_1', name:"Chance for Specialists Double Damage I", maxPoints:1, icon:'⚡', prerequisites:['spec_str_1'] }
-      ],
-      // Row 9
-      [
-        { id:'eng_str_1', name:"Engineer Corps' Strength I", maxPoints:20, icon:'🔨', prerequisites:['spec_str_1'] },
-        { id:'eng_double_1', name:"Chance for Engineer Corps Double Damage I", maxPoints:1, icon:'⚡', prerequisites:['eng_str_1'] }
-      ],
-      // Row 10
-      [
-        { id:'monster_str_1', name:"Monsters' Strength I", maxPoints:20, icon:'👿', prerequisites:['eng_str_1'] },
-        { id:'monster_double_1', name:"Chance for Monsters Double Damage I", maxPoints:1, icon:'⚡', prerequisites:['monster_str_1'] }
-      ]
-    ];
+     // Battle Tactics talent tree data structure
+        const talentData = [
+            // Row 1
+            [
+                { id: 'guards_train_1', name: "Guardsmen's Training Speed I", maxPoints: 20, icon: '⚔️', prerequisites: [] }
+            ],
+            // Row 2
+            [
+                { id: 'spec_train_1', name: "Specialists' Training Speed I", maxPoints: 20, icon: '🛡️', prerequisites: ['guards_train_1'] },
+                { id: 'spec_march_1', name: "Specialists' March Speed I", maxPoints: 20, icon: '🏃', prerequisites: ['spec_train_1'] },
+                { id: 'spec_health_1', name: "Specialists' Health I", maxPoints: 20, icon: '❤️', prerequisites: ['spec_march_1'] }
+            ],
+            // Row 3
+            [
+                { id: 'monster_train_1', name: "Monsters' Training Speed I", maxPoints: 20, icon: '👹', prerequisites: ['spec_train_1'] },
+                { id: 'monster_march_1', name: "Monsters' March Speed I", maxPoints: 20, icon: '🦶', prerequisites: ['monster_train_1'] },
+                { id: 'monster_health_1', name: "Monsters' Health I", maxPoints: 20, icon: '💪', prerequisites: ['monster_march_1'] }
+            ],
+            // Row 4
+            [
+                { id: 'siege_train_1', name: "Siege Engines' Training Speed I", maxPoints: 20, icon: '🏗️', prerequisites: ['monster_train_1'] },
+                { id: 'siege_march_1', name: "Siege Engines' March Speed I", maxPoints: 20, icon: '⚙️', prerequisites: ['siege_train_1'] },
+                { id: 'eng_health_1', name: "Engineer Corps' Health I", maxPoints: 20, icon: '🔧', prerequisites: ['siege_march_1'] }
+            ],
+            // Row 5
+            [
+                { id: 'guards_march_1', name: "Guardsmen's March Speed I", maxPoints: 20, icon: '🚶', prerequisites: ['siege_train_1'] }
+            ],
+            // Row 6
+            [
+                { id: 'guards_health_1', name: "Guardsmen's Health I", maxPoints: 20, icon: '❤️', prerequisites: ['guards_march_1'] },
+                { id: 'army_carry_1', name: "Army Carrying Capacity I", maxPoints: 20, icon: '🎒', prerequisites: ['guards_health_1'] }
+            ],
+            // Row 7
+            [
+                { id: 'guards_str_1', name: "Guardsmen's Strength I", maxPoints: 20, icon: '💪', prerequisites: ['guards_health_1'] },
+                { id: 'guards_double_1', name: "Chance for Guardsmen Double Damage I", maxPoints: 1, icon: '⚡', prerequisites: ['guards_str_1'] }
+            ],
+            // Row 8
+            [
+                { id: 'spec_str_1', name: "Specialists' Strength I", maxPoints: 20, icon: '🗡️', prerequisites: ['guards_str_1'] },
+                { id: 'spec_double_1', name: "Chance for Specialists Double Damage I", maxPoints: 1, icon: '⚡', prerequisites: ['spec_str_1'] }
+            ],
+            // Row 9
+            [
+                { id: 'eng_str_1', name: "Engineer Corps' Strength I", maxPoints: 20, icon: '🔨', prerequisites: ['spec_str_1'] },
+                { id: 'eng_double_1', name: "Chance for Engineer Corps Double Damage I", maxPoints: 1, icon: '⚡', prerequisites: ['eng_str_1'] }
+            ],
+            // Row 10
+            [
+                { id: 'monster_str_1', name: "Monsters' Strength I", maxPoints: 20, icon: '👿', prerequisites: ['eng_str_1'] },
+                { id: 'monster_double_1', name: "Chance for Monsters Double Damage I", maxPoints: 1, icon: '⚡', prerequisites: ['monster_str_1'] }
+            ],
+            // TIER II TALENTS
+            // Row 11
+            [
+                { id: 'guards_train_2', name: "Guardsmen's Training Speed II", maxPoints: 20, icon: '⚔️', prerequisites: ['monster_str_1'] }
+            ],
+            // Row 12
+            [
+                { id: 'spec_train_2', name: "Specialists' Training Speed II", maxPoints: 20, icon: '🛡️', prerequisites: ['guards_train_2'] },
+                { id: 'spec_march_2', name: "Specialists' March Speed II", maxPoints: 20, icon: '🏃', prerequisites: ['spec_train_2'] },
+                { id: 'spec_health_2', name: "Specialists' Health II", maxPoints: 20, icon: '❤️', prerequisites: ['spec_march_2'] }
+            ],
+            // Row 13
+            [
+                { id: 'monster_train_2', name: "Monsters' Training Speed II", maxPoints: 20, icon: '👹', prerequisites: ['spec_train_2'] },
+                { id: 'monster_march_2', name: "Monsters' March Speed II", maxPoints: 20, icon: '🦶', prerequisites: ['monster_train_2'] },
+                { id: 'monster_health_2', name: "Monsters' Health II", maxPoints: 20, icon: '💪', prerequisites: ['monster_march_2'] }
+            ],
+            // Row 14
+            [
+                { id: 'siege_train_2', name: "Siege Engines' Training Speed II", maxPoints: 20, icon: '🏗️', prerequisites: ['monster_train_2'] },
+                { id: 'siege_march_2', name: "Siege Engines' March Speed II", maxPoints: 20, icon: '⚙️', prerequisites: ['siege_train_2'] },
+                { id: 'eng_health_2', name: "Engineer Corps' Health II", maxPoints: 20, icon: '🔧', prerequisites: ['siege_march_2'] }
+            ],
+            // Row 15
+            [
+                { id: 'guards_march_2', name: "Guardsmen's March Speed II", maxPoints: 20, icon: '🚶', prerequisites: ['siege_train_2'] }
+            ],
+            // Row 16
+            [
+                { id: 'guards_health_2', name: "Guardsmen's Health II", maxPoints: 20, icon: '❤️', prerequisites: ['guards_march_2'] },
+                { id: 'army_carry_2', name: "Army Carrying Capacity II", maxPoints: 20, icon: '🎒', prerequisites: ['guards_health_2'] }
+            ],
+            // Row 17
+            [
+                { id: 'guards_str_2', name: "Guardsmen's Strength II", maxPoints: 20, icon: '💪', prerequisites: ['guards_health_2'] },
+                { id: 'guards_double_2', name: "Chance for Guardsmen Double Damage II", maxPoints: 1, icon: '⚡', prerequisites: ['guards_str_2'] }
+            ],
+            // Row 18
+            [
+                { id: 'spec_str_2', name: "Specialists' Strength II", maxPoints: 20, icon: '🗡️', prerequisites: ['guards_str_2'] },
+                { id: 'spec_double_2', name: "Chance for Specialists Double Damage II", maxPoints: 1, icon: '⚡', prerequisites: ['spec_str_2'] }
+            ],
+            // Row 19
+            [
+                { id: 'monster_str_2', name: "Monsters' Strength II", maxPoints: 20, icon: '👿', prerequisites: ['spec_str_2'] },
+                { id: 'monster_double_2', name: "Chance for Monsters Double Damage II", maxPoints: 1, icon: '⚡', prerequisites: ['monster_str_2'] }
+            ],
+            // Row 20
+            [
+                { id: 'eng_str_2', name: "Engineer Corps' Strength II", maxPoints: 20, icon: '🔨', prerequisites: ['monster_str_2'] },
+                { id: 'eng_double_2', name: "Chance for Engineer Corps Double Damage II", maxPoints: 1, icon: '⚡', prerequisites: ['eng_str_2'] }
+            ],
+            // TIER III TALENTS
+            // Row 21
+            [
+                { id: 'guards_train_3', name: "Guardsmen's Training Speed III", maxPoints: 20, icon: '⚔️', prerequisites: ['eng_str_2'] }
+            ],
+            // Row 22
+            [
+                { id: 'spec_train_3', name: "Specialists' Training Speed III", maxPoints: 20, icon: '🛡️', prerequisites: ['guards_train_3'] },
+                { id: 'spec_march_3', name: "Specialists' March Speed III", maxPoints: 20, icon: '🏃', prerequisites: ['spec_train_3'] },
+                { id: 'spec_health_3', name: "Specialists' Health III", maxPoints: 20, icon: '❤️', prerequisites: ['spec_march_3'] }
+            ],
+            // Row 23
+            [
+                { id: 'monster_train_3', name: "Monsters' Training Speed III", maxPoints: 20, icon: '👹', prerequisites: ['spec_train_3'] },
+                { id: 'monster_march_3', name: "Monsters' March Speed III", maxPoints: 20, icon: '🦶', prerequisites: ['monster_train_3'] },
+                { id: 'monster_health_3', name: "Monsters' Health III", maxPoints: 20, icon: '💪', prerequisites: ['monster_march_3'] }
+            ],
+            // Row 24
+            [
+                { id: 'siege_train_3', name: "Siege Engines' Training Speed III", maxPoints: 20, icon: '🏗️', prerequisites: ['monster_train_3'] },
+                { id: 'siege_march_3', name: "Siege Engines' March Speed III", maxPoints: 20, icon: '⚙️', prerequisites: ['siege_train_3'] },
+                { id: 'eng_health_3', name: "Engineer Corps' Health III", maxPoints: 20, icon: '🔧', prerequisites: ['siege_march_3'] }
+            ],
+            // Row 25
+            [
+                { id: 'guards_march_3', name: "Guardsmen's March Speed III", maxPoints: 20, icon: '🚶', prerequisites: ['siege_train_3'] }
+            ],
+            // Row 26
+            [
+                { id: 'guards_health_3', name: "Guardsmen's Health III", maxPoints: 20, icon: '❤️', prerequisites: ['guards_march_3'] },
+                { id: 'army_carry_3', name: "Army Carrying Capacity III", maxPoints: 20, icon: '🎒', prerequisites: ['guards_health_3'] }
+            ],
+            // Row 27
+            [
+                { id: 'guards_str_3', name: "Guardsmen's Strength III", maxPoints: 20, icon: '💪', prerequisites: ['guards_health_3'] },
+                { id: 'guards_double_3', name: "Chance for Guardsmen Double Damage III", maxPoints: 1, icon: '⚡', prerequisites: ['guards_str_3'] }
+            ],
+            // Row 28
+            [
+                { id: 'spec_str_3', name: "Specialists' Strength III", maxPoints: 20, icon: '🗡️', prerequisites: ['guards_str_3'] },
+                { id: 'spec_double_3', name: "Chance for Specialists Double Damage III", maxPoints: 1, icon: '⚡', prerequisites: ['spec_str_3'] }
+            ],
+            // Row 29
+            [
+                { id: 'monster_str_3', name: "Monsters' Strength III", maxPoints: 20, icon: '👿', prerequisites: ['spec_str_3'] },
+                { id: 'monster_double_3', name: "Chance for Monsters Double Damage III", maxPoints: 1, icon: '⚡', prerequisites: ['monster_str_3'] }
+            ],
+            // Row 30
+            [
+                { id: 'eng_str_3', name: "Engineer Corps' Strength III", maxPoints: 20, icon: '🔨', prerequisites: ['monster_str_3'] },
+                { id: 'eng_double_3', name: "Chance for Engineer Corps Double Damage III", maxPoints: 1, icon: '⚡', prerequisites: ['eng_str_3'] }
+            ]
+        ];
 
     // --- State ---
     let talentPoints = {};
@@ -380,7 +495,7 @@
             <button class="control-btn add-btn" onclick="addToMax('${t.id}')" ${!canAddMax?'disabled':''}>&gt;&gt;</button>
           </div>
         </div>
-        <div class="talent-points">${current}/${t.maxPoints}</div>
+        <div class="talent-points" style="--progress:${(current/t.maxPoints)*100}%">${current}/${t.maxPoints}</div>
       `;
 
       return card;
@@ -453,6 +568,3 @@
   </script>
 </body>
 </html>
-
-
-
