@@ -84,7 +84,7 @@
     .connection-line{position:absolute;background:#718096;z-index:1;transition:all .3s ease}
     .connection-line.active{background:#C89B3C;box-shadow:0 0 10px rgba(200,155,60,.5)}
     .vertical-line{width:3px;height:40px;top:-40px;left:50%;transform:translateX(-50%)}
-    .horizontal-line{height:3px;width:50px;top:50%;transform:translateY(-50%);left:-50px}
+    .horizontal-line{height:3px;width:30px;top:50%;transform:translateY(-50%);left:-30px}
 
     .footer{
       position:fixed;bottom:0;left:0;right:0;background:#000;height:70px;
@@ -111,23 +111,24 @@
       .header-title{font-size:22px}
 
       .talent-row{
-        gap:14px;
+        gap:12px;
         flex-wrap:nowrap; /* force 3 across */
         justify-content:center;
         min-height:300px;
       }
 
       .talent-card{
-        width:150px;
+        width:160px;
         height:260px;
         padding:12px;
       }
 
       .talent-name{font-size:.85rem;height:40px;margin-bottom:10px}
-      .controls-grid{width:110px;margin:0 auto 14px}
+      .controls-grid{width:120px;margin:0 auto 14px}
       .control-btn{height:30px;font-size:.85rem}
       .talent-points{font-size:.95rem;padding:4px 8px}
-      .tree-container{padding:12px 8px}
+      .tree-container{padding:12px 6px}
+      .horizontal-line{width:12px;left:-12px}
     }
 
     /* ====== Phones (≤480px) — 3 across, no wrap, no scroll ====== */
@@ -135,25 +136,26 @@
       .header-title{font-size:20px}
 
       .talent-row{
-        gap:8px;
+        gap:6px;
         flex-wrap:nowrap;          /* don't allow wrapping */
         justify-content:center;
         min-height:260px;
       }
 
       .talent-card{
-        width:112px;               /* 3*112 + 2*8 = 352px → fits 375px screens */
+        width:118px;               /* wider cards, 3*118 + 2*6 = 366px → fits 375px screens */
         height:220px;
         padding:10px;
       }
 
       .talent-icon{width:44px;height:44px;font-size:1.2rem}
       .talent-name{font-size:.78rem;height:36px;margin-bottom:8px}
-      .controls-grid{width:96px}
+      .controls-grid{width:102px;margin:0 auto 12px}
       .control-btn{height:26px;font-size:.8rem}
       .talent-points{font-size:.9rem;padding:3px 6px;bottom:6px}
 
-      .tree-container{padding:10px 6px}
+      .tree-container{padding:10px 3px}
+      .horizontal-line{width:6px;left:-6px}
     }
   </style>
 </head>
