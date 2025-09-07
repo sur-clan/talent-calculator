@@ -209,164 +209,165 @@
   </div>
 
   <script>
-  // Expert Battle Tactics talent tree data structure
+ // Expert Battle Tactics talent tree data structure (emoji-updated)
 const talentData = [
   // Row 1
   [
-    { id: 'siege_train_1', name: "Siege Engines' Training Speed I", maxPoints: 20, icon: '🏗️', prerequisites: [] }
+    { id: 'siege_train_1', name: "Siege Engines' Training Speed I", maxPoints: 20, icon: '⏳', prerequisites: [] }
   ],
   // Row 2 - ALL 3 must have a point to unlock Flying Units
   [
-    { id: 'mounted_train_1', name: "Mounted Units' Training Speed I", maxPoints: 20, icon: '🎠', prerequisites: ['siege_train_1'] },
-    { id: 'ranged_train_1', name: "Ranged Units' Training Speed I", maxPoints: 20, icon: '🏹', prerequisites: ['siege_train_1'] },
-    { id: 'melee_train_1', name: "Melee Units' Training Speed I", maxPoints: 20, icon: '⚔️', prerequisites: ['siege_train_1'] }
+    { id: 'mounted_train_1', name: "Mounted Units' Training Speed I", maxPoints: 20, icon: '⏳', prerequisites: ['siege_train_1'] },
+    { id: 'ranged_train_1',  name: "Ranged Units' Training Speed I",  maxPoints: 20, icon: '⏳', prerequisites: ['siege_train_1'] },
+    { id: 'melee_train_1',   name: "Melee Units' Training Speed I",   maxPoints: 20, icon: '⏳', prerequisites: ['siege_train_1'] }
   ],
   // Row 3 - Flying units
   [
-    { id: 'flying_train_1', name: "Flying Units' Training Speed I", maxPoints: 20, icon: '🦅', prerequisites: ['mounted_train_1', 'ranged_train_1', 'melee_train_1'] },
-    { id: 'flying_march_1', name: "Flying Units' March Speed I", maxPoints: 20, icon: '💨', prerequisites: ['flying_train_1'] }
+    { id: 'flying_train_1', name: "Flying Units' Training Speed I", maxPoints: 20, icon: '⏳', prerequisites: ['mounted_train_1', 'ranged_train_1', 'melee_train_1'] },
+    { id: 'flying_march_1', name: "Flying Units' March Speed I",    maxPoints: 20, icon: '🦶', prerequisites: ['flying_train_1'] }
   ],
   // Row 4 - Siege engines (Strength in middle unlocks from Flying Training)
   [
-    { id: 'siege_health_1', name: "Siege Engines' Health I", maxPoints: 20, icon: '🛡️', prerequisites: ['siege_str_1'] },
-    { id: 'siege_str_1', name: "Siege Engines' Strength I", maxPoints: 20, icon: '💪', prerequisites: ['flying_train_1'] },
-    { id: 'siege_march_1', name: "Siege Engines' March Speed I", maxPoints: 20, icon: '⚙️', prerequisites: ['siege_str_1'] }
+    { id: 'siege_health_1', name: "Siege Engines' Health I",      maxPoints: 20, icon: '❤️', prerequisites: ['siege_str_1'] },
+    { id: 'siege_str_1',    name: "Siege Engines' Strength I",    maxPoints: 20, icon: '💪', prerequisites: ['flying_train_1'] },
+    { id: 'siege_march_1',  name: "Siege Engines' March Speed I", maxPoints: 20, icon: '🦶', prerequisites: ['siege_str_1'] }
   ],
   // Row 5 - Unit march speeds (all unlock from Siege Strength)
   [
-    { id: 'mounted_march_1', name: "Mounted Units' March Speed I", maxPoints: 20, icon: '🏃', prerequisites: ['siege_str_1'] },
-    { id: 'ranged_march_1', name: "Ranged Units' March Speed I", maxPoints: 20, icon: '🏃', prerequisites: ['siege_str_1'] },
-    { id: 'melee_march_1', name: "Melee Units' March Speed I", maxPoints: 20, icon: '🏃', prerequisites: ['siege_str_1'] }
+    { id: 'mounted_march_1', name: "Mounted Units' March Speed I", maxPoints: 20, icon: '🦶', prerequisites: ['siege_str_1'] },
+    { id: 'ranged_march_1',  name: "Ranged Units' March Speed I",  maxPoints: 20, icon: '🦶', prerequisites: ['siege_str_1'] },
+    { id: 'melee_march_1',   name: "Melee Units' March Speed I",   maxPoints: 20, icon: '🦶', prerequisites: ['siege_str_1'] }
   ],
   // Row 6 - Unit health
   [
     { id: 'mounted_health_1', name: "Mounted Units' Health I", maxPoints: 20, icon: '❤️', prerequisites: ['mounted_march_1'] },
-    { id: 'ranged_health_1', name: "Ranged Units' Health I", maxPoints: 20, icon: '❤️', prerequisites: ['ranged_march_1'] },
-    { id: 'melee_health_1', name: "Melee Units' Health I", maxPoints: 20, icon: '❤️', prerequisites: ['melee_march_1'] }
+    { id: 'ranged_health_1',  name: "Ranged Units' Health I",  maxPoints: 20, icon: '❤️', prerequisites: ['ranged_march_1'] },
+    { id: 'melee_health_1',   name: "Melee Units' Health I",   maxPoints: 20, icon: '❤️', prerequisites: ['melee_march_1'] }
   ],
   // Row 7 - Unit strength
   [
     { id: 'mounted_str_1', name: "Mounted Units' Strength I", maxPoints: 20, icon: '💪', prerequisites: ['mounted_health_1'] },
-    { id: 'ranged_str_1', name: "Ranged Units' Strength I", maxPoints: 20, icon: '💪', prerequisites: ['ranged_health_1'] },
-    { id: 'melee_str_1', name: "Melee Units' Strength I", maxPoints: 20, icon: '💪', prerequisites: ['melee_health_1'] }
+    { id: 'ranged_str_1',  name: "Ranged Units' Strength I",  maxPoints: 20, icon: '💪', prerequisites: ['ranged_health_1'] },
+    { id: 'melee_str_1',   name: "Melee Units' Strength I",   maxPoints: 20, icon: '💪', prerequisites: ['melee_health_1'] }
   ],
   // Row 8 - Flying Units' Strength (requires ALL 9 above)
   [
-    { id: 'flying_health_1', name: "Flying Units' Health I", maxPoints: 20, icon: '❤️', prerequisites: ['flying_str_1'] },
-    { id: 'flying_str_1', name: "Flying Units' Strength I", maxPoints: 20, icon: '💪', prerequisites: ['mounted_march_1', 'ranged_march_1', 'melee_march_1', 'mounted_health_1', 'ranged_health_1', 'melee_health_1', 'mounted_str_1', 'ranged_str_1', 'melee_str_1'] }
+    { id: 'flying_health_1', name: "Flying Units' Health I",   maxPoints: 20, icon: '❤️', prerequisites: ['flying_str_1'] },
+    { id: 'flying_str_1',    name: "Flying Units' Strength I", maxPoints: 20, icon: '💪', prerequisites: ['mounted_march_1', 'ranged_march_1', 'melee_march_1', 'mounted_health_1', 'ranged_health_1', 'melee_health_1', 'mounted_str_1', 'ranged_str_1', 'melee_str_1'] }
   ],
   // Row 9 - Fortifications
   [
-    { id: 'fort_str_1', name: "Strength of Fortifications I", maxPoints: 20, icon: '🏰', prerequisites: ['flying_str_1'] },
-    { id: 'fort_health_1', name: "Health of Fortifications I", maxPoints: 20, icon: '🛡️', prerequisites: ['fort_str_1'] }
+    { id: 'fort_str_1',   name: "Strength of Fortifications I", maxPoints: 20, icon: '💪', prerequisites: ['flying_str_1'] },
+    { id: 'fort_health_1',name: "Health of Fortifications I",   maxPoints: 20, icon: '❤️', prerequisites: ['fort_str_1'] }
   ],
   
   // TIER II
   // Row 10
   [
-    { id: 'siege_train_2', name: "Siege Engines' Training Speed II", maxPoints: 20, icon: '🏗️', prerequisites: ['fort_str_1'] }
+    { id: 'siege_train_2', name: "Siege Engines' Training Speed II", maxPoints: 20, icon: '⏳', prerequisites: ['fort_str_1'] }
   ],
   // Row 11 - ALL 3 must have a point to unlock Flying Units II
   [
-    { id: 'mounted_train_2', name: "Mounted Units' Training Speed II", maxPoints: 20, icon: '🎠', prerequisites: ['siege_train_2'] },
-    { id: 'ranged_train_2', name: "Ranged Units' Training Speed II", maxPoints: 20, icon: '🏹', prerequisites: ['siege_train_2'] },
-    { id: 'melee_train_2', name: "Melee Units' Training Speed II", maxPoints: 20, icon: '⚔️', prerequisites: ['siege_train_2'] }
+    { id: 'mounted_train_2', name: "Mounted Units' Training Speed II", maxPoints: 20, icon: '⏳', prerequisites: ['siege_train_2'] },
+    { id: 'ranged_train_2',  name: "Ranged Units' Training Speed II",  maxPoints: 20, icon: '⏳', prerequisites: ['siege_train_2'] },
+    { id: 'melee_train_2',   name: "Melee Units' Training Speed II",   maxPoints: 20, icon: '⏳', prerequisites: ['siege_train_2'] }
   ],
   // Row 12 - Flying units II
   [
-    { id: 'march_vs_players_1', name: "March Speed Against Other Players I", maxPoints: 20, icon: '⚡', prerequisites: ['flying_train_2'] },
-    { id: 'flying_train_2', name: "Flying Units' Training Speed II", maxPoints: 20, icon: '🦅', prerequisites: ['mounted_train_2', 'ranged_train_2', 'melee_train_2'] },
-    { id: 'flying_march_2', name: "Flying Units' March Speed II", maxPoints: 20, icon: '💨', prerequisites: ['flying_train_2'] }
+    { id: 'march_vs_players_1', name: "March Speed Against Other Players I", maxPoints: 20, icon: '🦶', prerequisites: ['flying_train_2'] },
+    { id: 'flying_train_2',     name: "Flying Units' Training Speed II",     maxPoints: 20, icon: '⏳', prerequisites: ['mounted_train_2', 'ranged_train_2', 'melee_train_2'] },
+    { id: 'flying_march_2',     name: "Flying Units' March Speed II",        maxPoints: 20, icon: '🦶', prerequisites: ['flying_train_2'] }
   ],
   // Row 13 - Siege engines II (Strength in middle unlocks from Flying Training II)
   [
-    { id: 'siege_health_2', name: "Siege Engines' Health II", maxPoints: 20, icon: '🛡️', prerequisites: ['siege_str_2'] },
-    { id: 'siege_str_2', name: "Siege Engines' Strength II", maxPoints: 20, icon: '💪', prerequisites: ['flying_train_2'] },
-    { id: 'siege_march_2', name: "Siege Engines' March Speed II", maxPoints: 20, icon: '⚙️', prerequisites: ['siege_str_2'] }
+    { id: 'siege_health_2', name: "Siege Engines' Health II",      maxPoints: 20, icon: '❤️', prerequisites: ['siege_str_2'] },
+    { id: 'siege_str_2',    name: "Siege Engines' Strength II",    maxPoints: 20, icon: '💪', prerequisites: ['flying_train_2'] },
+    { id: 'siege_march_2',  name: "Siege Engines' March Speed II", maxPoints: 20, icon: '🦶', prerequisites: ['siege_str_2'] }
   ],
   // Row 14 - Unit march speeds II (all unlock from Siege Strength II)
   [
-    { id: 'mounted_march_2', name: "Mounted Units' March Speed II", maxPoints: 20, icon: '🏃', prerequisites: ['siege_str_2'] },
-    { id: 'ranged_march_2', name: "Ranged Units' March Speed II", maxPoints: 20, icon: '🏃', prerequisites: ['siege_str_2'] },
-    { id: 'melee_march_2', name: "Melee Units' March Speed II", maxPoints: 20, icon: '🏃', prerequisites: ['siege_str_2'] }
+    { id: 'mounted_march_2', name: "Mounted Units' March Speed II", maxPoints: 20, icon: '🦶', prerequisites: ['siege_str_2'] },
+    { id: 'ranged_march_2',  name: "Ranged Units' March Speed II",  maxPoints: 20, icon: '🦶', prerequisites: ['siege_str_2'] },
+    { id: 'melee_march_2',   name: "Melee Units' March Speed II",   maxPoints: 20, icon: '🦶', prerequisites: ['siege_str_2'] }
   ],
   // Row 15 - Unit health II
   [
     { id: 'mounted_health_2', name: "Mounted Units' Health II", maxPoints: 20, icon: '❤️', prerequisites: ['mounted_march_2'] },
-    { id: 'ranged_health_2', name: "Ranged Units' Health II", maxPoints: 20, icon: '❤️', prerequisites: ['ranged_march_2'] },
-    { id: 'melee_health_2', name: "Melee Units' Health II", maxPoints: 20, icon: '❤️', prerequisites: ['melee_march_2'] }
+    { id: 'ranged_health_2',  name: "Ranged Units' Health II",  maxPoints: 20, icon: '❤️', prerequisites: ['ranged_march_2'] },
+    { id: 'melee_health_2',   name: "Melee Units' Health II",   maxPoints: 20, icon: '❤️', prerequisites: ['melee_march_2'] }
   ],
   // Row 16 - Unit strength II
   [
     { id: 'mounted_str_2', name: "Mounted Units' Strength II", maxPoints: 20, icon: '💪', prerequisites: ['mounted_health_2'] },
-    { id: 'ranged_str_2', name: "Ranged Units' Strength II", maxPoints: 20, icon: '💪', prerequisites: ['ranged_health_2'] },
-    { id: 'melee_str_2', name: "Melee Units' Strength II", maxPoints: 20, icon: '💪', prerequisites: ['melee_health_2'] }
+    { id: 'ranged_str_2',  name: "Ranged Units' Strength II",  maxPoints: 20, icon: '💪', prerequisites: ['ranged_health_2'] },
+    { id: 'melee_str_2',   name: "Melee Units' Strength II",   maxPoints: 20, icon: '💪', prerequisites: ['melee_health_2'] }
   ],
   // Row 17 - Flying Units' Strength II (requires ALL 9 above)
   [
-    { id: 'flying_health_2', name: "Flying Units' Health II", maxPoints: 20, icon: '❤️', prerequisites: ['flying_str_2'] },
-    { id: 'flying_str_2', name: "Flying Units' Strength II", maxPoints: 20, icon: '💪', prerequisites: ['mounted_march_2', 'ranged_march_2', 'melee_march_2', 'mounted_health_2', 'ranged_health_2', 'melee_health_2', 'mounted_str_2', 'ranged_str_2', 'melee_str_2'] },
-    { id: 'army_carry_1', name: "Army Carrying Capacity I", maxPoints: 20, icon: '🎒', prerequisites: ['flying_str_2'] }
+    { id: 'flying_health_2', name: "Flying Units' Health II",   maxPoints: 20, icon: '❤️', prerequisites: ['flying_str_2'] },
+    { id: 'flying_str_2',    name: "Flying Units' Strength II", maxPoints: 20, icon: '💪', prerequisites: ['mounted_march_2', 'ranged_march_2', 'melee_march_2', 'mounted_health_2', 'ranged_health_2', 'melee_health_2', 'mounted_str_2', 'ranged_str_2', 'melee_str_2'] },
+    { id: 'army_carry_1',    name: "Army Carrying Capacity I",  maxPoints: 20, icon: '🎒', prerequisites: ['flying_str_2'] }
   ],
   // Row 18 - Fortifications II
   [
-    { id: 'fort_str_2', name: "Strength of Fortifications II", maxPoints: 20, icon: '🏰', prerequisites: ['flying_str_2'] },
-    { id: 'fort_health_2', name: "Health of Fortifications II", maxPoints: 20, icon: '🛡️', prerequisites: ['fort_str_2'] }
+    { id: 'fort_str_2',   name: "Strength of Fortifications II", maxPoints: 20, icon: '💪', prerequisites: ['flying_str_2'] },
+    { id: 'fort_health_2',name: "Health of Fortifications II",   maxPoints: 20, icon: '❤️', prerequisites: ['fort_str_2'] }
   ],
   
   // TIER III
   // Row 19
   [
-    { id: 'siege_train_3', name: "Siege Engines' Training Speed III", maxPoints: 20, icon: '🏗️', prerequisites: ['fort_str_2'] }
+    { id: 'siege_train_3', name: "Siege Engines' Training Speed III", maxPoints: 20, icon: '⏳', prerequisites: ['fort_str_2'] }
   ],
   // Row 20 - ALL 3 must have a point to unlock Flying Units III
   [
-    { id: 'mounted_train_3', name: "Mounted Units' Training Speed III", maxPoints: 20, icon: '🎠', prerequisites: ['siege_train_3'] },
-    { id: 'ranged_train_3', name: "Ranged Units' Training Speed III", maxPoints: 20, icon: '🏹', prerequisites: ['siege_train_3'] },
-    { id: 'melee_train_3', name: "Melee Units' Training Speed III", maxPoints: 20, icon: '⚔️', prerequisites: ['siege_train_3'] }
+    { id: 'mounted_train_3', name: "Mounted Units' Training Speed III", maxPoints: 20, icon: '⏳', prerequisites: ['siege_train_3'] },
+    { id: 'ranged_train_3',  name: "Ranged Units' Training Speed III",  maxPoints: 20, icon: '⏳', prerequisites: ['siege_train_3'] },
+    { id: 'melee_train_3',   name: "Melee Units' Training Speed III",   maxPoints: 20, icon: '⏳', prerequisites: ['siege_train_3'] }
   ],
   // Row 21 - Flying units III
   [
-    { id: 'march_vs_players_2', name: "March Speed Against Other Players II", maxPoints: 20, icon: '⚡', prerequisites: ['flying_train_3'] },
-    { id: 'flying_train_3', name: "Flying Units' Training Speed III", maxPoints: 20, icon: '🦅', prerequisites: ['mounted_train_3', 'ranged_train_3', 'melee_train_3'] },
-    { id: 'flying_march_3', name: "Flying Units' March Speed III", maxPoints: 20, icon: '💨', prerequisites: ['flying_train_3'] }
+    { id: 'march_vs_players_2', name: "March Speed Against Other Players II", maxPoints: 20, icon: '🦶', prerequisites: ['flying_train_3'] },
+    { id: 'flying_train_3',     name: "Flying Units' Training Speed III",     maxPoints: 20, icon: '⏳', prerequisites: ['mounted_train_3', 'ranged_train_3', 'melee_train_3'] },
+    { id: 'flying_march_3',     name: "Flying Units' March Speed III",        maxPoints: 20, icon: '🦶', prerequisites: ['flying_train_3'] }
   ],
   // Row 22 - Siege engines III (Strength in middle unlocks from Flying Training III)
   [
-    { id: 'siege_health_3', name: "Siege Engines' Health III", maxPoints: 20, icon: '🛡️', prerequisites: ['siege_str_3'] },
-    { id: 'siege_str_3', name: "Siege Engines' Strength III", maxPoints: 20, icon: '💪', prerequisites: ['flying_train_3'] },
-    { id: 'siege_march_3', name: "Siege Engines' March Speed III", maxPoints: 20, icon: '⚙️', prerequisites: ['siege_str_3'] }
+    { id: 'siege_health_3', name: "Siege Engines' Health III",      maxPoints: 20, icon: '❤️', prerequisites: ['siege_str_3'] },
+    { id: 'siege_str_3',    name: "Siege Engines' Strength III",    maxPoints: 20, icon: '💪', prerequisites: ['flying_train_3'] },
+    { id: 'siege_march_3',  name: "Siege Engines' March Speed III", maxPoints: 20, icon: '🦶', prerequisites: ['siege_str_3'] }
   ],
   // Row 23 - Unit march speeds III (all unlock from Siege Strength III)
   [
-    { id: 'mounted_march_3', name: "Mounted Units' March Speed III", maxPoints: 20, icon: '🏃', prerequisites: ['siege_str_3'] },
-    { id: 'ranged_march_3', name: "Ranged Units' March Speed III", maxPoints: 20, icon: '🏃', prerequisites: ['siege_str_3'] },
-    { id: 'melee_march_3', name: "Melee Units' March Speed III", maxPoints: 20, icon: '🏃', prerequisites: ['siege_str_3'] }
+    { id: 'mounted_march_3', name: "Mounted Units' March Speed III", maxPoints: 20, icon: '🦶', prerequisites: ['siege_str_3'] },
+    { id: 'ranged_march_3',  name: "Ranged Units' March Speed III",  maxPoints: 20, icon: '🦶', prerequisites: ['siege_str_3'] },
+    { id: 'melee_march_3',   name: "Melee Units' March Speed III",   maxPoints: 20, icon: '🦶', prerequisites: ['siege_str_3'] }
   ],
   // Row 24 - Unit health III
   [
     { id: 'mounted_health_3', name: "Mounted Units' Health III", maxPoints: 20, icon: '❤️', prerequisites: ['mounted_march_3'] },
-    { id: 'ranged_health_3', name: "Ranged Units' Health III", maxPoints: 20, icon: '❤️', prerequisites: ['ranged_march_3'] },
-    { id: 'melee_health_3', name: "Melee Units' Health III", maxPoints: 20, icon: '❤️', prerequisites: ['melee_march_3'] }
+    { id: 'ranged_health_3',  name: "Ranged Units' Health III",  maxPoints: 20, icon: '❤️', prerequisites: ['ranged_march_3'] },
+    { id: 'melee_health_3',   name: "Melee Units' Health III",   maxPoints: 20, icon: '❤️', prerequisites: ['melee_march_3'] }
   ],
   // Row 25 - Unit strength III
   [
     { id: 'mounted_str_3', name: "Mounted Units' Strength III", maxPoints: 20, icon: '💪', prerequisites: ['mounted_health_3'] },
-    { id: 'ranged_str_3', name: "Ranged Units' Strength III", maxPoints: 20, icon: '💪', prerequisites: ['ranged_health_3'] },
-    { id: 'melee_str_3', name: "Melee Units' Strength III", maxPoints: 20, icon: '💪', prerequisites: ['melee_health_3'] }
+    { id: 'ranged_str_3',  name: "Ranged Units' Strength III",  maxPoints: 20, icon: '💪', prerequisites: ['ranged_health_3'] },
+    { id: 'melee_str_3',   name: "Melee Units' Strength III",   maxPoints: 20, icon: '💪', prerequisites: ['melee_health_3'] }
   ],
   // Row 26 - Flying Units' Strength III (requires ALL 9 above)
   [
-    { id: 'flying_health_3', name: "Flying Units' Health III", maxPoints: 20, icon: '❤️', prerequisites: ['flying_str_3'] },
-    { id: 'flying_str_3', name: "Flying Units' Strength III", maxPoints: 20, icon: '💪', prerequisites: ['mounted_march_3', 'ranged_march_3', 'melee_march_3', 'mounted_health_3', 'ranged_health_3', 'melee_health_3', 'mounted_str_3', 'ranged_str_3', 'melee_str_3'] },
-    { id: 'army_carry_2', name: "Army Carrying Capacity II", maxPoints: 20, icon: '🎒', prerequisites: ['flying_str_3'] }
+    { id: 'flying_health_3', name: "Flying Units' Health III",   maxPoints: 20, icon: '❤️', prerequisites: ['flying_str_3'] },
+    { id: 'flying_str_3',    name: "Flying Units' Strength III", maxPoints: 20, icon: '💪', prerequisites: ['mounted_march_3', 'ranged_march_3', 'melee_march_3', 'mounted_health_3', 'ranged_health_3', 'melee_health_3', 'mounted_str_3', 'ranged_str_3', 'melee_str_3'] },
+    { id: 'army_carry_2',    name: "Army Carrying Capacity II",  maxPoints: 20, icon: '🎒', prerequisites: ['flying_str_3'] }
   ],
   // Row 27 - Fortifications III
   [
-    { id: 'fort_str_3', name: "Strength of Fortifications III", maxPoints: 20, icon: '🏰', prerequisites: ['flying_str_3'] },
-    { id: 'fort_health_3', name: "Health of Fortifications III", maxPoints: 20, icon: '🛡️', prerequisites: ['fort_str_3'] }
+    { id: 'fort_str_3',   name: "Strength of Fortifications III", maxPoints: 20, icon: '💪', prerequisites: ['flying_str_3'] },
+    { id: 'fort_health_3',name: "Health of Fortifications III",   maxPoints: 20, icon: '❤️', prerequisites: ['fort_str_3'] }
   ]
 ];
+
 
     // --- State ---
     let talentPoints = {};
@@ -569,3 +570,4 @@ const talentData = [
   </script>
 </body>
 </html>
+
