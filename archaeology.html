@@ -21,17 +21,13 @@
     }
     body::before{
       content:"";
-      position:fixed;
-      inset:0;
-      z-index:-2;
+      position:fixed;inset:0;z-index:-2;
       background:url('scales.jpg') center/cover no-repeat fixed;
       transform:translateZ(0);
     }
     body::after{
       content:"";
-      position:fixed;
-      inset:0;
-      z-index:-1;
+      position:fixed;inset:0;z-index:-1;
       background:linear-gradient(135deg, rgba(10,14,20,.75), rgba(20,26,36,.75));
       pointer-events:none;
     }
@@ -52,14 +48,39 @@
       text-shadow:0 1px 0 rgba(0,0,0,.4)
     }
 
-    /* ===== POINTS BAR ===== */
+    /* ===== POINTS BAR (now with visual progress) ===== */
     .points-bar{
       position:fixed;top:56px;left:0;right:0;height:44px;
       background:#0f3c55;border-bottom:2px solid #C89B3C;
-      display:flex;align-items:center;justify-content:center;gap:10px;z-index:900
+      display:flex;align-items:center;justify-content:center;gap:12px;z-index:900;
+      padding:0 12px;
     }
     .points-emblem{font-size:18px;filter:drop-shadow(0 1px 0 rgba(0,0,0,.4));opacity:.9}
-    .points-bar #pointsText{color:#ffffff;font-weight:700;font-size:16px}
+
+    .points-track{
+      position:relative;
+      width:clamp(230px, 58vw, 520px);
+      height:14px;
+      border:1px solid #C89B3C;
+      border-radius:999px;
+      background:rgba(255,255,255,0.08);
+      overflow:hidden;
+    }
+    .points-fill{
+      position:absolute;top:0;left:0;height:100%;
+      width:0%;
+      background:linear-gradient(90deg,#31838f,#155879);
+      transition:width .3s ease;
+    }
+    .points-label{
+      position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+      font-weight:700;font-size:12px;color:#ffd777;text-shadow:0 1px 0 rgba(0,0,0,.6);pointer-events:none;
+    }
+
+    .points-remaining{
+      font-size:12px;color:#ffd777;font-weight:700;min-width:max-content;
+      text-shadow:0 1px 0 rgba(0,0,0,.4)
+    }
 
     /* ===== TREE LAYOUT ===== */
     .tree-container{
@@ -132,6 +153,7 @@
       .talent-points{font-size:.95rem;padding:4px 8px}
       .tree-container{padding:12px 6px}
       .horizontal-line{width:12px;left:-12px}
+      .points-track{width:clamp(220px, 62vw, 480px)}
     }
 
     /* ====== Phones (≤480px) — 3 across, no wrap ====== */
@@ -146,6 +168,8 @@
       .talent-points{font-size:.9rem;padding:3px 6px;bottom:6px}
       .tree-container{padding:10px 3px}
       .horizontal-line{width:6px;left:-6px}
+      .points-track{width:78vw}
+      .points-remaining{display:none} /* keep it tidy on tiny screens */
     }
   </style>
 </head>
@@ -157,10 +181,14 @@
     <button class="info-button" onclick="openModal()">ⓘ</button>
   </div>
 
-  <!-- Points bar -->
+  <!-- Points bar with visual progress -->
   <div class="points-bar">
     <span class="points-emblem">🏺</span>
-    <span id="pointsText">0</span>
+    <div class="points-track" aria-label="Total points used progress">
+      <div class="points-fill" id="pointsFill"></div>
+      <div class="points-label"><span id="usedPoints">0</span>/<span id="totalPoints">100</span> used</div>
+    </div>
+    <div class="points-remaining">Remaining: <span id="pointsText">100</span></div>
   </div>
 
   <!-- Tree -->
@@ -193,144 +221,144 @@
   </div>
 
   <script>
-    /* ===== Archaeology Talent Data (kept from your page) ===== */
-    const archaeologyTalentData = [
-      // Row 1
-      [
-        { id: 'tar_prod_1', name: "Tar Production Speed I", maxPoints: 20, icon: '🛢️', prerequisites: [] },
-        { id: 'bonus_exp_1', name: "Bonus Experience in Crypts I", maxPoints: 20, icon: '📈', prerequisites: ['tar_prod_1'] }
-      ],
-      // Row 2
-      [
-        { id: 'crypt_march_1', name: "Crypt March Range I", maxPoints: 20, icon: '🗺️', prerequisites: ['tar_prod_1'] },
-        { id: 'tar_cap_1', name: "Tar Capacity I", maxPoints: 20, icon: '📦', prerequisites: ['crypt_march_1'] }
-      ],
-      // Row 3
-      [
-        { id: 'equip_craft_1', name: "Equipment Crafting Speed I", maxPoints: 20, icon: '🔨', prerequisites: ['crypt_march_1'] },
-        { id: 'crypt_twice_1', name: "Chance to Explore a Crypt Twice I", maxPoints: 1, icon: '🎲', prerequisites: ['equip_craft_1'] },
-        { id: 'crypt_cost_1', name: "Crypt Exploration Cost I", maxPoints: 1, icon: '💰', prerequisites: ['crypt_twice_1'] }
-      ],
-      // Row 4
-      [
-        { id: 'crypt_eff_1', name: "Crypt Exploration Efficiency I", maxPoints: 20, icon: '⚡', prerequisites: ['equip_craft_1'] }
-      ],
-      // Row 5
-      [
-        { id: 'tar_prod_2', name: "Tar Production Speed II", maxPoints: 20, icon: '🛢️', prerequisites: ['crypt_eff_1'] },
-        { id: 'bonus_exp_2', name: "Bonus Experience in Crypts II", maxPoints: 20, icon: '📈', prerequisites: ['tar_prod_2'] }
-      ],
-      // Row 6
-      [
-        { id: 'crypt_march_2', name: "Crypt March Range II", maxPoints: 20, icon: '🗺️', prerequisites: ['tar_prod_2'] },
-        { id: 'tar_cap_2', name: "Tar Capacity II", maxPoints: 20, icon: '📦', prerequisites: ['crypt_march_2'] }
-      ],
-      // Row 7
-      [
-        { id: 'equip_craft_2', name: "Equipment Crafting Speed II", maxPoints: 20, icon: '🔨', prerequisites: ['crypt_march_2'] },
-        { id: 'crypt_twice_2', name: "Chance to Explore a Crypt Twice II", maxPoints: 1, icon: '🎲', prerequisites: ['equip_craft_2'] },
-        { id: 'crypt_cost_2', name: "Crypt Exploration Cost II", maxPoints: 1, icon: '💰', prerequisites: ['crypt_twice_2'] }
-      ],
-      // Row 8
-      [
-        { id: 'crypt_eff_2', name: "Crypt Exploration Efficiency II", maxPoints: 20, icon: '⚡', prerequisites: ['equip_craft_2'] }
-      ],
-      // Row 9
-      [
-        { id: 'tar_prod_3', name: "Tar Production Speed III", maxPoints: 20, icon: '🛢️', prerequisites: ['crypt_eff_2'] },
-        { id: 'bonus_exp_3', name: "Bonus Experience in Crypts III", maxPoints: 20, icon: '📈', prerequisites: ['tar_prod_3'] }
-      ],
-      // Row 10
-      [
-        { id: 'crypt_march_3', name: "Crypt March Range III", maxPoints: 20, icon: '🗺️', prerequisites: ['tar_prod_3'] },
-        { id: 'tar_cap_3', name: "Tar Capacity III", maxPoints: 20, icon: '📦', prerequisites: ['crypt_march_3'] }
-      ],
-      // Row 11
-      [
-        { id: 'common_eff_1', name: "Common Crypt Exploration Efficiency I", maxPoints: 20, icon: '🏺', prerequisites: ['crypt_march_3'] },
-        { id: 'common_cost_1', name: "Common Crypt Exploration Cost I", maxPoints: 1, icon: '💎', prerequisites: ['common_eff_1'] }
-      ],
-      // Row 12
-      [
-        { id: 'rare_eff_1', name: "Rare Crypt Exploration Efficiency I", maxPoints: 20, icon: '💀', prerequisites: ['common_eff_1'] },
-        { id: 'rare_cost_1', name: "Rare Crypt Exploration Cost I", maxPoints: 1, icon: '💎', prerequisites: ['rare_eff_1'] }
-      ],
-      // Row 13
-      [
-        { id: 'epic_eff_1', name: "Epic Crypt Exploration Efficiency I", maxPoints: 20, icon: '👑', prerequisites: ['rare_eff_1'] },
-        { id: 'epic_cost_1', name: "Epic Crypt Exploration Cost I", maxPoints: 1, icon: '💎', prerequisites: ['epic_eff_1'] }
-      ],
-      // Row 14
-      [
-        { id: 'crypt_eff_3', name: "Crypt Exploration Efficiency III", maxPoints: 20, icon: '⚡', prerequisites: ['epic_eff_1'] },
-        { id: 'crypt_twice_3', name: "Chance to Explore a Crypt Twice III", maxPoints: 1, icon: '🎲', prerequisites: ['crypt_eff_3'] },
-        { id: 'crypt_cost_3', name: "Crypt Exploration Cost III", maxPoints: 1, icon: '💰', prerequisites: ['crypt_twice_3'] }
-      ],
-      // Row 15
-      [
-        { id: 'equip_craft_3', name: "Equipment Crafting Speed III", maxPoints: 20, icon: '🔨', prerequisites: ['crypt_eff_3'] }
-      ],
-      // Row 16
-      [
-        { id: 'tar_prod_4', name: "Tar Production IV", maxPoints: 20, icon: '🛢️', prerequisites: ['equip_craft_3'] },
-        { id: 'bonus_exp_4', name: "Bonus Experience in Crypts IV", maxPoints: 20, icon: '📈', prerequisites: ['tar_prod_4'] }
-      ],
-      // Row 17 (AND requirement next row)
-      [
-        { id: 'crypt_march_4', name: "Crypt March Range IV", maxPoints: 20, icon: '🗺️', prerequisites: ['tar_prod_4'] },
-        { id: 'tar_cap_4', name: "Tar Capacity IV", maxPoints: 20, icon: '📦', prerequisites: ['tar_prod_4'] }
-      ],
-      // Row 18
-      [
-        { id: 'common_eff_2', name: "Common Crypt Exploration Efficiency II", maxPoints: 20, icon: '🏺', prerequisites: ['crypt_march_4','tar_cap_4'] },
-        { id: 'common_cost_2', name: "Common Crypt Exploration Cost II", maxPoints: 1, icon: '💎', prerequisites: ['common_eff_2'] }
-      ],
-      // Row 19
-      [
-        { id: 'rare_eff_2', name: "Rare Crypt Exploration Efficiency II", maxPoints: 20, icon: '💀', prerequisites: ['common_eff_2'] },
-        { id: 'rare_cost_2', name: "Rare Crypt Exploration Cost II", maxPoints: 1, icon: '💎', prerequisites: ['rare_eff_2'] }
-      ],
-      // Row 20
-      [
-        { id: 'epic_eff_3', name: "Epic Crypt Exploration Efficiency III", maxPoints: 20, icon: '👑', prerequisites: ['rare_eff_2'] },
-        { id: 'epic_cost_2', name: "Epic Crypt Exploration Cost II", maxPoints: 1, icon: '💎', prerequisites: ['epic_eff_3'] }
-      ],
-      // Row 21
-      [
-        { id: 'equip_craft_4', name: "Equipment Crafting Speed IV", maxPoints: 20, icon: '🔨', prerequisites: ['epic_eff_3'] },
-        { id: 'crypt_twice_4', name: "Chance to Explore a Crypt Twice IV", maxPoints: 1, icon: '🎲', prerequisites: ['equip_craft_4'] }
-      ],
-      // Row 22
-      [
-        { id: 'tar_prod_5', name: "Tar Production V", maxPoints: 20, icon: '🛢️', prerequisites: ['equip_craft_4'] },
-        { id: 'bonus_exp_5', name: "Bonus Experience in Crypts V", maxPoints: 20, icon: '📈', prerequisites: ['tar_prod_5'] }
-      ],
-      // Row 23
-      [
-        { id: 'crypt_march_5', name: "Crypt March Range V", maxPoints: 20, icon: '🗺️', prerequisites: ['tar_prod_5'] },
-        { id: 'tar_cap_5', name: "Tar Capacity V", maxPoints: 20, icon: '📦', prerequisites: ['tar_prod_5'] }
-      ],
-      // Row 24
-      [
-        { id: 'common_eff_3', name: "Common Crypt Exploration Efficiency III", maxPoints: 20, icon: '🏺', prerequisites: ['crypt_march_5','tar_cap_5'] },
-        { id: 'common_cost_3', name: "Common Crypt Exploration Cost III", maxPoints: 1, icon: '💎', prerequisites: ['common_eff_3'] }
-      ],
-      // Row 25
-      [
-        { id: 'rare_eff_3', name: "Rare Crypt Exploration Efficiency III", maxPoints: 20, icon: '💀', prerequisites: ['common_eff_3'] },
-        { id: 'rare_cost_3', name: "Rare Crypt Exploration Cost III", maxPoints: 1, icon: '💎', prerequisites: ['rare_eff_3'] }
-      ],
-      // Row 26
-      [
-        { id: 'epic_eff_2', name: "Epic Crypt Exploration Efficiency II", maxPoints: 20, icon: '👑', prerequisites: ['rare_eff_3'] },
-        { id: 'epic_cost_3', name: "Epic Crypt Exploration Cost III", maxPoints: 1, icon: '💎', prerequisites: ['epic_eff_2'] }
-      ],
-      // Row 27
-      [
-        { id: 'equip_craft_5', name: "Equipment Crafting Speed V", maxPoints: 20, icon: '🔨', prerequisites: ['epic_eff_2'] },
-        { id: 'crypt_twice_5', name: "Chance to Explore a Crypt Twice V", maxPoints: 1, icon: '🎲', prerequisites: ['equip_craft_5'] }
-      ]
-    ];
+    /* ===== Archaeology Talent Data (your structure) ===== */
+const archaeologyTalentData = [
+  // Row 1
+  [
+    { id: 'tar_prod_1',  name: "Tar Production Speed I",                 maxPoints: 20, icon: '⏳', prerequisites: [] },
+    { id: 'bonus_exp_1', name: "Bonus Experience in Crypts I",           maxPoints: 20, icon: '📈', prerequisites: ['tar_prod_1'] }
+  ],
+  // Row 2
+  [
+    { id: 'crypt_march_1', name: "Crypt March Range I",                  maxPoints: 20, icon: '↔️', prerequisites: ['tar_prod_1'] },
+    { id: 'tar_cap_1',     name: "Tar Capacity I",                       maxPoints: 20, icon: '🛢️', prerequisites: ['crypt_march_1'] }
+  ],
+  // Row 3
+  [
+    { id: 'equip_craft_1', name: "Equipment Crafting Speed I",           maxPoints: 20, icon: '⏱️', prerequisites: ['crypt_march_1'] },
+    { id: 'crypt_twice_1', name: "Chance to Explore a Crypt Twice I",    maxPoints: 1,  icon: '🎲', prerequisites: ['equip_craft_1'] },
+    { id: 'crypt_cost_1',  name: "Crypt Exploration Cost I",             maxPoints: 1,  icon: '💰', prerequisites: ['crypt_twice_1'] }
+  ],
+  // Row 4
+  [
+    { id: 'crypt_eff_1',   name: "Crypt Exploration Efficiency I",       maxPoints: 20, icon: '✨', prerequisites: ['equip_craft_1'] }
+  ],
+  // Row 5
+  [
+    { id: 'tar_prod_2',  name: "Tar Production Speed II",                maxPoints: 20, icon: '⏳', prerequisites: ['crypt_eff_1'] },
+    { id: 'bonus_exp_2', name: "Bonus Experience in Crypts II",          maxPoints: 20, icon: '📈', prerequisites: ['tar_prod_2'] }
+  ],
+  // Row 6
+  [
+    { id: 'crypt_march_2', name: "Crypt March Range II",                 maxPoints: 20, icon: '↔️', prerequisites: ['tar_prod_2'] },
+    { id: 'tar_cap_2',     name: "Tar Capacity II",                      maxPoints: 20, icon: '🛢️', prerequisites: ['crypt_march_2'] }
+  ],
+  // Row 7
+  [
+    { id: 'equip_craft_2', name: "Equipment Crafting Speed II",          maxPoints: 20, icon: '⏱️', prerequisites: ['crypt_march_2'] },
+    { id: 'crypt_twice_2', name: "Chance to Explore a Crypt Twice II",   maxPoints: 1,  icon: '🎲', prerequisites: ['equip_craft_2'] },
+    { id: 'crypt_cost_2',  name: "Crypt Exploration Cost II",            maxPoints: 1,  icon: '💰', prerequisites: ['crypt_twice_2'] }
+  ],
+  // Row 8
+  [
+    { id: 'crypt_eff_2',   name: "Crypt Exploration Efficiency II",      maxPoints: 20, icon: '✨', prerequisites: ['equip_craft_2'] }
+  ],
+  // Row 9
+  [
+    { id: 'tar_prod_3',  name: "Tar Production Speed III",               maxPoints: 20, icon: '⏳', prerequisites: ['crypt_eff_2'] },
+    { id: 'bonus_exp_3', name: "Bonus Experience in Crypts III",         maxPoints: 20, icon: '📈', prerequisites: ['tar_prod_3'] }
+  ],
+  // Row 10
+  [
+    { id: 'crypt_march_3', name: "Crypt March Range III",                maxPoints: 20, icon: '↔️', prerequisites: ['tar_prod_3'] },
+    { id: 'tar_cap_3',     name: "Tar Capacity III",                     maxPoints: 20, icon: '🛢️', prerequisites: ['crypt_march_3'] }
+  ],
+  // Row 11
+  [
+    { id: 'common_eff_1', name: "Common Crypt Exploration Efficiency I", maxPoints: 20, icon: '✨', prerequisites: ['crypt_march_3'] },
+    { id: 'common_cost_1',name: "Common Crypt Exploration Cost I",       maxPoints: 1,  icon: '💎', prerequisites: ['common_eff_1'] }
+  ],
+  // Row 12
+  [
+    { id: 'rare_eff_1',   name: "Rare Crypt Exploration Efficiency I",   maxPoints: 20, icon: '✨', prerequisites: ['common_eff_1'] },
+    { id: 'rare_cost_1',  name: "Rare Crypt Exploration Cost I",         maxPoints: 1,  icon: '💎', prerequisites: ['rare_eff_1'] }
+  ],
+  // Row 13
+  [
+    { id: 'epic_eff_1',   name: "Epic Crypt Exploration Efficiency I",   maxPoints: 20, icon: '✨', prerequisites: ['rare_eff_1'] },
+    { id: 'epic_cost_1',  name: "Epic Crypt Exploration Cost I",         maxPoints: 1,  icon: '💎', prerequisites: ['epic_eff_1'] }
+  ],
+  // Row 14
+  [
+    { id: 'crypt_eff_3',  name: "Crypt Exploration Efficiency III",      maxPoints: 20, icon: '✨', prerequisites: ['epic_eff_1'] },
+    { id: 'crypt_twice_3',name: "Chance to Explore a Crypt Twice III",   maxPoints: 1,  icon: '🎲', prerequisites: ['crypt_eff_3'] },
+    { id: 'crypt_cost_3', name: "Crypt Exploration Cost III",            maxPoints: 1,  icon: '💰', prerequisites: ['crypt_twice_3'] }
+  ],
+  // Row 15
+  [
+    { id: 'equip_craft_3', name: "Equipment Crafting Speed III",         maxPoints: 20, icon: '⏱️', prerequisites: ['crypt_eff_3'] }
+  ],
+  // Row 16
+  [
+    { id: 'tar_prod_4',  name: "Tar Production IV",                      maxPoints: 20, icon: '⏳', prerequisites: ['equip_craft_3'] },
+    { id: 'bonus_exp_4', name: "Bonus Experience in Crypts IV",          maxPoints: 20, icon: '📈', prerequisites: ['tar_prod_4'] }
+  ],
+  // Row 17
+  [
+    { id: 'crypt_march_4', name: "Crypt March Range IV",                 maxPoints: 20, icon: '↔️', prerequisites: ['tar_prod_4'] },
+    { id: 'tar_cap_4',     name: "Tar Capacity IV",                      maxPoints: 20, icon: '🛢️', prerequisites: ['tar_prod_4'] }
+  ],
+  // Row 18 (AND prereqs)
+  [
+    { id: 'common_eff_2', name: "Common Crypt Exploration Efficiency II",maxPoints: 20, icon: '✨', prerequisites: ['crypt_march_4','tar_cap_4'] },
+    { id: 'common_cost_2',name: "Common Crypt Exploration Cost II",      maxPoints: 1,  icon: '💎', prerequisites: ['common_eff_2'] }
+  ],
+  // Row 19
+  [
+    { id: 'rare_eff_2',   name: "Rare Crypt Exploration Efficiency II",  maxPoints: 20, icon: '✨', prerequisites: ['common_eff_2'] },
+    { id: 'rare_cost_2',  name: "Rare Crypt Exploration Cost II",        maxPoints: 1,  icon: '💎', prerequisites: ['rare_eff_2'] }
+  ],
+  // Row 20
+  [
+    { id: 'epic_eff_3',   name: "Epic Crypt Exploration Efficiency III", maxPoints: 20, icon: '✨', prerequisites: ['rare_eff_2'] },
+    { id: 'epic_cost_2',  name: "Epic Crypt Exploration Cost II",        maxPoints: 1,  icon: '💎', prerequisites: ['epic_eff_3'] }
+  ],
+  // Row 21
+  [
+    { id: 'equip_craft_4', name: "Equipment Crafting Speed IV",          maxPoints: 20, icon: '⏱️', prerequisites: ['epic_eff_3'] },
+    { id: 'crypt_twice_4', name: "Chance to Explore a Crypt Twice IV",   maxPoints: 1,  icon: '🎲', prerequisites: ['equip_craft_4'] }
+  ],
+  // Row 22
+  [
+    { id: 'tar_prod_5',  name: "Tar Production V",                       maxPoints: 20, icon: '⏳', prerequisites: ['equip_craft_4'] },
+    { id: 'bonus_exp_5', name: "Bonus Experience in Crypts V",           maxPoints: 20, icon: '📈', prerequisites: ['tar_prod_5'] }
+  ],
+  // Row 23
+  [
+    { id: 'crypt_march_5', name: "Crypt March Range V",                  maxPoints: 20, icon: '↔️', prerequisites: ['tar_prod_5'] },
+    { id: 'tar_cap_5',     name: "Tar Capacity V",                       maxPoints: 20, icon: '🛢️', prerequisites: ['tar_prod_5'] }
+  ],
+  // Row 24
+  [
+    { id: 'common_eff_3', name: "Common Crypt Exploration Efficiency III",maxPoints: 20, icon: '✨', prerequisites: ['crypt_march_5','tar_cap_5'] },
+    { id: 'common_cost_3',name: "Common Crypt Exploration Cost III",     maxPoints: 1,  icon: '💎', prerequisites: ['common_eff_3'] }
+  ],
+  // Row 25
+  [
+    { id: 'rare_eff_3',   name: "Rare Crypt Exploration Efficiency III", maxPoints: 20, icon: '✨', prerequisites: ['common_eff_3'] },
+    { id: 'rare_cost_3',  name: "Rare Crypt Exploration Cost III",       maxPoints: 1,  icon: '💎', prerequisites: ['rare_eff_3'] }
+  ],
+  // Row 26
+  [
+    { id: 'epic_eff_2',   name: "Epic Crypt Exploration Efficiency II",  maxPoints: 20, icon: '✨', prerequisites: ['rare_eff_3'] },
+    { id: 'epic_cost_3',  name: "Epic Crypt Exploration Cost III",       maxPoints: 1,  icon: '💎', prerequisites: ['epic_eff_2'] }
+  ],
+  // Row 27
+  [
+    { id: 'equip_craft_5', name: "Equipment Crafting Speed V",           maxPoints: 20, icon: '⏱️', prerequisites: ['epic_eff_2'] },
+    { id: 'crypt_twice_5', name: "Chance to Explore a Crypt Twice V",    maxPoints: 1,  icon: '🎲', prerequisites: ['equip_craft_5'] }
+  ]
+];
 
     // --- State ---
     let talentPoints = {};
@@ -376,13 +404,25 @@
         if(hubData){
           const data = JSON.parse(hubData);
           const totalAllocated = Object.values(data.allocatedPoints||{}).reduce((a,b)=>a+b,0);
-          return data.totalPoints - totalAllocated;
+          return (data.totalPoints||100) - totalAllocated;
         }
       }catch(e){ console.error('Error calculating remaining points:', e); }
       return totalAvailablePoints - Object.values(talentPoints).reduce((a,b)=>a+b,0);
     }
 
-    // Talent logic (AND when multiple prereqs)
+    function getUsedOverall(){
+      try{
+        const hubData = localStorage.getItem('totalBattleTalentHub');
+        if(hubData){
+          const data = JSON.parse(hubData);
+          return Object.values(data.allocatedPoints||{}).reduce((a,b)=>a+b,0);
+        }
+      }catch(e){ console.error('Error calculating used points:', e); }
+      // fallback: only this page's allocation
+      return Object.values(talentPoints).reduce((a,b)=>a+b,0);
+    }
+
+    // Talent unlocks (AND when multiple prereqs)
     function isTalentUnlocked(t){
       if(!t.prerequisites || t.prerequisites.length===0) return true;
       if(t.prerequisites.length>1){
@@ -434,7 +474,7 @@
 
       const canAddOne = isUnlocked && current<t.maxPoints && remaining>0;
       const canRemoveOne = current>0;
-      const canAddMax = isUnlocked && current<t.maxPoints && remaining>0;
+      const canAddMax  = isUnlocked && current<t.maxPoints && remaining>0;
       const canRemoveAll = current>0;
 
       card.innerHTML = `
@@ -479,8 +519,22 @@
     }
 
     function updateDisplay(){
-      const remaining=getRemainingPoints();
+      // Numbers
+      const remaining = getRemainingPoints();
+      const usedOverall = getUsedOverall();
+      const total = totalAvailablePoints || 100;
+
+      // Texts
       document.getElementById('pointsText').textContent = remaining;
+      document.getElementById('usedPoints').textContent  = usedOverall;
+      document.getElementById('totalPoints').textContent = total;
+
+      // Visual fill
+      const pct = Math.max(0, Math.min(100, (usedOverall / total) * 100));
+      const fill = document.getElementById('pointsFill');
+      if(fill) fill.style.width = pct + '%';
+
+      // Cards
       renderTalentTree();
     }
 
@@ -489,9 +543,8 @@
     function closeModal(){ document.getElementById('infoModal').style.display='none'; }
     window.onclick = e => { const m=document.getElementById('infoModal'); if(e.target===m) closeModal(); };
 
-    // Nav
+    // Nav & Utilities
     function returnToHub(){ saveToHub(); window.location.href='index.html'; }
-
     function resetAllTalents(){
       if(confirm('Are you sure you want to reset the Archaeology talent tree?')){
         initializeTalents(); saveToHub(); updateDisplay();
